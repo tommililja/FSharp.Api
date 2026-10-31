@@ -3,7 +3,6 @@ namespace FSharp.Api
 open System.Collections.Generic
 open System.Text.Json
 open FSharp.Control
-open Microsoft.AspNetCore.Http
 open Oxpecker
 open Farse
 

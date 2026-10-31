@@ -11,6 +11,7 @@
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <Compile Include="Extensions.fs" />
+        <Compile Include="OpenApiValidationHandler.fs" />
         <Compile Include="TestData.fs" />
         <Compile Include="TestEnv.fs" />
         <Compile Include="TestApp.fs" />

@@ -33,7 +33,7 @@ module Email =
 
     let parse (str:string) =
         if emailRegex.IsMatch(str)
-        then Ok <| Email str
+        then Ok (Email str)
         else Error "Invalid email address."
 
     let asString (Email x) = x

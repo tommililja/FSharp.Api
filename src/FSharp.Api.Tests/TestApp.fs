@@ -57,7 +57,7 @@ module TestApp =
                             )
                 }
 
-            let client = factory.CreateDefaultClient()
+            let client = factory.CreateDefaultClient(new OpenApiValidationHandler(Docs.document))
 
             return new TestApp(factory, connectionString, client)
         }
