@@ -7,7 +7,7 @@ module Endpoints =
     let private docs =
         [
             GET [ route "/" (htmlView Docs.html) ]
-            GET [ route Docs.JsonFilename (jsonString Docs.json) ]
+            GET [ route Docs.JsonFilename (jsonBytes Docs.json) ]
         ]
 
     let list =

@@ -2,6 +2,7 @@ namespace FSharp.Api
 
 open System.Collections.Generic
 open System.Net.Http
+open System.Text
 open Microsoft.OpenApi
 open Oxpecker.ViewEngine
 
@@ -29,10 +30,13 @@ module Docs =
         )
 
     let json =
-        document
-            .SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_2)
-            .GetAwaiter()
-            .GetResult()
+        let json =
+            document
+                .SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_2)
+                .GetAwaiter()
+                .GetResult()
+
+        Encoding.UTF8.GetBytes(json)
 
     let html =
         html(lang = "en") {

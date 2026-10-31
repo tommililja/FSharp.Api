@@ -23,13 +23,14 @@ module Response =
                 do! writer.FlushAsync()
             }
 
-    let jsonString (string:string) : EndpointHandler =
+    let jsonBytes (bytes:byte[]) : EndpointHandler =
         fun ctx ->
             task {
                 ctx.Response.ContentType <- JsonContentType
                 ctx.Response.StatusCode <- 200
-                ctx.Response.ContentLength <- string.Length
-                do! ctx.Response.WriteAsync(string, ctx.RequestAborted)
+                ctx.Response.ContentLength <- bytes.Length
+                let! _ = ctx.Response.BodyWriter.WriteAsync(bytes, ctx.RequestAborted)
+                ()
             }
 
     let stream (sequence:IAsyncEnumerable<Json>) : EndpointHandler =
