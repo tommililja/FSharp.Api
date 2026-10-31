@@ -23,6 +23,8 @@ module TestApp =
 
     let private container =
         MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
+            .WithReuse(true)
+            .WithLabel("reuse-id", "fsharp-api-tests")
             .Build()
 
     let private start =
