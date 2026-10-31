@@ -1,10 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <OutputType>EXE</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <Content Include="appsettings.json" />
         <Compile Include="Docs\OpenApi.fs" />
         <Compile Include="Docs\UserPaths.fs" />
         <Compile Include="Docs\Docs.fs" />
