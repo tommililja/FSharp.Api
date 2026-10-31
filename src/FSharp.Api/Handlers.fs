@@ -27,7 +27,7 @@ module RegisterUser =
                 |> Database.Users.tryGetByEmail
 
             if user.IsSome then
-                logger.LogWarning "User is already registered."
+                logger.LogWarning("User is already registered.")
                 do! Error Conflict
 
             let! userId = Guid.create ()
@@ -39,7 +39,7 @@ module RegisterUser =
 
             do! Database.Users.add user
 
-            logger.LogInformation $"Registered user %s{UserId.asString user.Id}."
+            logger.LogInformation("Registered user {UserId}.", UserId.asString user.Id)
 
             return CreatedAt $"/user/%s{Guid.asString userId}"
         }
@@ -55,7 +55,7 @@ module GetUser =
                 |> Database.Users.tryGet
                 |> IO.someOr NotFound
 
-            logger.LogInformation $"Found user %s{UserId.asString user.Id}."
+            logger.LogInformation("Found user {UserId}.", UserId.asString user.Id)
 
             let json =
                 JObj [
@@ -94,7 +94,7 @@ module Unregister =
                 |> Database.Users.tryDelete
                 |> IO.someOr NotFound
 
-            logger.LogInformation $"Deleted user %s{UserId.asString userId}."
+            logger.LogInformation("Deleted user {UserId}.", UserId.asString userId)
 
             return NoContent
         }
