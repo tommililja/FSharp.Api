@@ -21,7 +21,6 @@
     <ItemGroup>
       <PackageReference Include="Donald" Version="10.1.0" />
       <PackageReference Include="Farse" Version="1.0.0" />
-      <PackageReference Include="FSharp.Control.AsyncSeq" Version="4.15.0" />
       <PackageReference Include="FSharp.Control.TaskSeq" Version="1.1.1" />
       <PackageReference Include="JsonSchema.Net" Version="9.5.0" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
