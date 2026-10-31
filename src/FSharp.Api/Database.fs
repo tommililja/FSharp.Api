@@ -39,13 +39,17 @@ module Database =
     let private stream sql param map =
         io {
             let! dbUnit = command sql param
+            let token = dbUnit.CancellationToken
+            let cmd = dbUnit.Command :?> DbCommand
+
+            let! reader = cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess, token)
+
             return
                 taskSeq {
-                    use cmd = dbUnit.Command :?> DbCommand
-                    let token = dbUnit.CancellationToken
-                    use! rd = cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess, token)
-                    while! rd.ReadAsync(token) do
-                        yield map (rd :> IDataReader)
+                    use _ = cmd
+                    use reader = reader
+                    while! reader.ReadAsync(token) do
+                        yield map (reader :> IDataReader)
                 }
         }
 
