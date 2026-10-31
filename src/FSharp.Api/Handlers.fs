@@ -5,96 +5,97 @@ open Microsoft.Extensions.Logging
 open Farse
 open Farse.Operators
 
-type RegisterUser = {
-    Email: Email
-}
+module Handlers =
 
-module RegisterUser =
-    open Parse
+    module UserResponse =
 
-    let parser =
-        parser {
-            let! email = "email" &= refine string Email.parse
-            return { Email = email }
+        let fromUser (user:User) =
+            JObj [
+                "id", JStr (UserId.asString user.Id)
+                "email", JStr (Email.asString user.Email)
+            ]
+
+    module RegisterUser =
+        open Parse
+
+        type Request = {
+            Email: Email
         }
 
-    let handle request =
-        io {
-            let! logger = Logger.get "RegisterUser"
-
-            let! user =
-                request.Email
-                |> Database.Users.tryGetByEmail
-
-            if user.IsSome then
-                logger.LogWarning("User is already registered.")
-                do! Error Conflict
-
-            let! userId = Guid.create ()
-
-            let user = {
-                Id = UserId.fromGuid userId
-                Email = request.Email
+        let parser =
+            parser {
+                let! email = "email" &= refine string Email.parse
+                return { Email = email }
             }
 
-            do! Database.Users.add user
+        let handle request =
+            io {
+                let! logger = Logger.get "Handlers.RegisterUser"
 
-            logger.LogInformation("Registered user {UserId}.", UserId.asString user.Id)
+                let! user =
+                    request.Email
+                    |> Database.Users.tryGetByEmail
 
-            return CreatedAt $"/user/%s{Guid.asString userId}"
-        }
+                if user.IsSome then
+                    logger.LogWarning("User is already registered.")
+                    do! Error Conflict
 
-module GetUser =
+                let! userId = Guid.create ()
 
-    let handle userId =
-        io {
-            let! logger = Logger.get "GetUser"
+                let user = {
+                    Id = UserId.fromGuid userId
+                    Email = request.Email
+                }
 
-            let! user =
-                userId
-                |> Database.Users.tryGet
-                |> IO.someOr NotFound
+                do! Database.Users.add user
 
-            logger.LogInformation("Found user {UserId}.", UserId.asString user.Id)
+                logger.LogInformation("Registered user {UserId}.", UserId.asString user.Id)
 
-            let json =
-                JObj [
-                    "id", JStr (UserId.asString userId)
-                    "email", JStr (Email.asString user.Email)
-                ]
+                return CreatedAt $"/user/%s{Guid.asString userId}"
+            }
 
-            return Content json
-        }
+    module GetUser =
 
-module GetUsers =
+        let handle userId =
+            io {
+                let! logger = Logger.get "Handlers.GetUser"
 
-    let handle () =
-        io {
-            let! users = Database.Users.getStream ()
+                let! user =
+                    userId
+                    |> Database.Users.tryGet
+                    |> IO.someOr NotFound
 
-            let response =
-                users
-                |> TaskSeq.map (fun user ->
-                    JObj [
-                        "id", JStr (UserId.asString user.Id)
-                        "email", JStr (Email.asString user.Email)
-                    ]
-                )
+                logger.LogInformation("Found user {UserId}.", UserId.asString user.Id)
 
-            return Stream response
-        }
+                let json = UserResponse.fromUser user
 
-module Unregister =
+                return Content json
+            }
 
-    let handle userId =
-        io {
-            let! logger = Logger.get "Unregister"
+    module GetUsers =
 
-            do! userId
-                |> Database.Users.tryDelete
-                |> IO.someOr NotFound
+        let handle () =
+            io {
+                let! users = Database.Users.getStream ()
 
-            logger.LogInformation("Unregistered user {UserId}.", UserId.asString userId)
+                let response =
+                    users
+                    |> TaskSeq.map UserResponse.fromUser
 
-            return NoContent
-        }
+                return Stream response
+            }
+
+    module UnregisterUser =
+
+        let handle userId =
+            io {
+                let! logger = Logger.get "Handlers.UnregisterUser"
+
+                do! userId
+                    |> Database.Users.tryDelete
+                    |> IO.someOr NotFound
+
+                logger.LogInformation("Unregistered user {UserId}.", UserId.asString userId)
+
+                return NoContent
+            }
