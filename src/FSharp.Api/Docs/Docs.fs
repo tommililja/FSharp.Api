@@ -17,11 +17,11 @@ module Docs =
             Servers = ResizeArray [ OpenApiServer(Url = "/") ],
             Paths =
                 OpenApi.paths [
-                    "/user", OpenApi.pathItem [
+                    "/users", OpenApi.pathItem [
                         HttpMethod.Get, UserPaths.getUsers
                         HttpMethod.Post, UserPaths.registerUser
                     ]
-                    "/user/{userId}", OpenApi.pathItem [
+                    "/users/{userId}", OpenApi.pathItem [
                         HttpMethod.Get, UserPaths.getUser
                         HttpMethod.Delete, UserPaths.unregisterUser
                     ]

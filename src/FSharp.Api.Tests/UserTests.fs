@@ -10,7 +10,7 @@ open Farse
 module UserTests =
 
     [<Fact>]
-    let ``POST /user should register a User and return 201 with the correct location`` () =
+    let ``POST /users should register a User and return 201 with the correct location`` () =
         task {
             let id = Guid.NewGuid()
             let email = "alice@domain.com"
@@ -21,7 +21,7 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/user", request)
+            let! register = app.Client.PostAsync("/users", request)
             Expect.equal "Expected equal status codes" HttpStatusCode.Created register.StatusCode
 
             let! getUser = app.Client.GetAsync(register.Headers.Location)
@@ -41,7 +41,7 @@ module UserTests =
         }
 
     [<Fact>]
-    let ``POST /user should return 400 when the email is invalid`` () =
+    let ``POST /users should return 400 when the email is invalid`` () =
         task {
             let id = Guid.NewGuid()
             let email = "alicedomain.com"
@@ -52,13 +52,13 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/user", request)
+            let! register = app.Client.PostAsync("/users", request)
 
             Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
         }
 
     [<Fact>]
-    let ``POST /user should return 409 when the User is already registered`` () =
+    let ``POST /users should return 409 when the User is already registered`` () =
         task {
             let id = Guid.NewGuid()
             let email = "alice@domain.com"
@@ -71,13 +71,13 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/user", request)
+            let! register = app.Client.PostAsync("/users", request)
 
             Expect.equal "Expected equal status codes." HttpStatusCode.Conflict register.StatusCode
         }
 
     [<Fact>]
-    let ``GET /user should return all Users`` () =
+    let ``GET /users should return all Users`` () =
         task {
             let id = Guid.NewGuid()
 
@@ -85,7 +85,7 @@ module UserTests =
 
             do! TestData.insertUsers 100 app.ConnectionString
 
-            let! getUsers = app.Client.GetAsync("/user")
+            let! getUsers = app.Client.GetAsync("/users")
             Expect.equal "Expected equal status codes." HttpStatusCode.OK getUsers.StatusCode
 
             let! json = HttpResponseMessage.asJson getUsers
@@ -99,19 +99,19 @@ module UserTests =
         }
 
     [<Fact>]
-    let ``GET /user/id should return 404 when the User is not found`` () =
+    let ``GET /users/id should return 404 when the User is not found`` () =
         task {
             let id = Guid.NewGuid()
 
             use! app = TestApp.create id
 
-            let! getUser = app.Client.GetAsync($"/user/%s{Guid.asString id}")
+            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString id}")
 
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
-    let ``DELETE /user/id should unregister the User and return 204`` () =
+    let ``DELETE /users/id should unregister the User and return 204`` () =
         task {
             let id = Guid.NewGuid()
             let email = "alice@domain.com"
@@ -120,21 +120,21 @@ module UserTests =
 
             do! TestData.insertUser id email app.ConnectionString
 
-            let! unregister = app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
+            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString id}")
             Expect.equal "Expected equal status codes." HttpStatusCode.NoContent unregister.StatusCode
 
-            let! getUser = app.Client.GetAsync($"/user/%s{Guid.asString id}")
+            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString id}")
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
-    let ``DELETE /user/id should return 404 when the user is not found`` () =
+    let ``DELETE /users/id should return 404 when the user is not found`` () =
         task {
             let id = Guid.NewGuid()
 
             use! app = TestApp.create id
 
-            let! unregister = app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
+            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString id}")
 
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound unregister.StatusCode
         }

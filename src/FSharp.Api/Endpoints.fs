@@ -12,7 +12,7 @@ module Endpoints =
 
     let list =
         [
-            subRoute "/user" [
+            subRoute "/users" [
                 GET [
                     router "/" Handlers.GetUsers.handle
                     routefr "/{%O:guid}" (UserId.fromGuid >> Handlers.GetUser.handle)

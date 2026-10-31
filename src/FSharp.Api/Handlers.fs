@@ -51,7 +51,7 @@ module Handlers =
 
                 logger.LogInformation("Registered user {UserId}.", UserId.asString user.Id)
 
-                return CreatedAt $"/user/%s{Guid.asString userId}"
+                return CreatedAt $"/users/%s{Guid.asString userId}"
             }
 
     module GetUser =
