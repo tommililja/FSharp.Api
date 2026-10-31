@@ -2,8 +2,8 @@ namespace FSharp.Api.Tests
 
 open System.Net.Http
 open System.Text
+open System.Threading
 open Farse
-open Expecto.Flip
 
 module Expect =
 
@@ -12,9 +12,13 @@ module Expect =
         | Some diff -> failwith $"Expected equal Json values: \n\n%s{diff}."
         | None -> ()
 
-    let statusCode code (response:HttpResponseMessage) =
-        Expect.equal "Expected equal status codes." code response.StatusCode
-        response
+module HttpResponseMessage =
+
+    let asJson (x:HttpResponseMessage) =
+        task {
+            let! stream = x.Content.ReadAsStreamAsync()
+            return! stream |> Json.fromStreamAsync CancellationToken.None
+        }
 
 module Json =
 

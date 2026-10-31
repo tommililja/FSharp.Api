@@ -2,7 +2,6 @@
 
 open System
 open System.Net
-open System.Threading
 open FSharp.Api
 open Xunit
 open Expecto.Flip
@@ -22,16 +21,13 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            let! register =
-                app.Client.PostAsync("/user", request)
-                |> Task.map (Expect.statusCode HttpStatusCode.Created)
+            let! register = app.Client.PostAsync("/user", request)
+            Expect.equal "Expected equal status codes" HttpStatusCode.Created register.StatusCode
 
-            let! user =
-                app.Client.GetAsync(register.Headers.Location)
-                |> Task.map (Expect.statusCode HttpStatusCode.OK)
+            let! getUser = app.Client.GetAsync(register.Headers.Location)
+            Expect.equal "Expected equal status codes" HttpStatusCode.OK getUser.StatusCode
 
-            let! stream = user.Content.ReadAsStreamAsync()
-            let! json = stream |> Json.fromStreamAsync CancellationToken.None
+            let! json = HttpResponseMessage.asJson getUser
 
             let expected =
                 JObj [
@@ -41,7 +37,7 @@ module UserTests =
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
 
-            return Expect.equalJson expected actual
+            Expect.equalJson expected actual
         }
 
     [<Fact>]
@@ -56,9 +52,9 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            do!
-                app.Client.PostAsync("/user", request)
-                |> Task.map (Expect.statusCode HttpStatusCode.BadRequest >> ignore)
+            let! register = app.Client.PostAsync("/user", request)
+
+            Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
         }
 
     [<Fact>]
@@ -75,9 +71,9 @@ module UserTests =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
-            do!
-                app.Client.PostAsync("/user", request)
-                |> Task.map (Expect.statusCode HttpStatusCode.Conflict >> ignore)
+            let! register = app.Client.PostAsync("/user", request)
+
+            Expect.equal "Expected equal status codes." HttpStatusCode.Conflict register.StatusCode
         }
 
     [<Fact>]
@@ -89,12 +85,10 @@ module UserTests =
 
             do! TestData.insertUsers 100 app.ConnectionString
 
-            let! users =
-                app.Client.GetAsync("/user")
-                |> Task.map (Expect.statusCode HttpStatusCode.OK)
+            let! getUsers = app.Client.GetAsync("/user")
+            Expect.equal "Expected equal status codes." HttpStatusCode.OK getUsers.StatusCode
 
-            let! stream = users.Content.ReadAsStreamAsync()
-            let! json = stream |> Json.fromStreamAsync CancellationToken.None
+            let! json = HttpResponseMessage.asJson getUsers
 
             let actual =
                 match json with
@@ -111,9 +105,9 @@ module UserTests =
 
             use! app = TestApp.create id
 
-            do!
-                app.Client.GetAsync($"/user/%s{Guid.asString id}")
-                |> Task.map (Expect.statusCode HttpStatusCode.NotFound >> ignore)
+            let! getUser = app.Client.GetAsync($"/user/%s{Guid.asString id}")
+
+            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
@@ -126,13 +120,11 @@ module UserTests =
 
             do! TestData.insertUser id email app.ConnectionString
 
-            do!
-                app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
-                |> Task.map (Expect.statusCode HttpStatusCode.NoContent >> ignore)
+            let! unregister = app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
+            Expect.equal "Expected equal status codes." HttpStatusCode.NoContent unregister.StatusCode
 
-            let! user = app.Client.GetAsync($"/user/%s{Guid.asString id}")
-
-            return Expect.statusCode HttpStatusCode.NotFound user
+            let! getUser = app.Client.GetAsync($"/user/%s{Guid.asString id}")
+            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
@@ -142,7 +134,7 @@ module UserTests =
 
             use! app = TestApp.create id
 
-            do!
-                app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
-                |> Task.map (Expect.statusCode HttpStatusCode.NotFound >> ignore)
+            let! unregister = app.Client.DeleteAsync($"/user/%s{Guid.asString id}")
+
+            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound unregister.StatusCode
         }
