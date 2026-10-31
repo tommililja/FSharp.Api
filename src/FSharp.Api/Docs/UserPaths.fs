@@ -97,17 +97,17 @@ module UserPaths =
             Tags = OpenApi.tagRefs [ "User" ]
         )
 
-    let deleteUser =
+    let unregisterUser =
         OpenApiOperation (
-            Summary = "Delete user",
-            Description = "Deletes a user by userId.",
+            Summary = "Unregister user",
+            Description = "Unregisters a user by userId.",
             Parameters =
                 OpenApi.parameters [
                     userIdParam
                 ],
             Responses =
                 OpenApi.responses [
-                    "204", OpenApiResponse(Description = "User deleted.")
+                    "204", OpenApiResponse(Description = "User unregistered.")
                     "404", OpenApiResponse(Description = "User not found.")
                 ],
             Tags = OpenApi.tagRefs [ "User" ]

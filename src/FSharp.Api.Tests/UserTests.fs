@@ -100,7 +100,7 @@ module UserTests =
         }
 
     [<Fact>]
-    let ``DELETE /user/id should delete the User and return 204`` () =
+    let ``DELETE /user/id should unregister the User and return 204`` () =
         task {
             let id = Guid.NewGuid()
             let email = "alice@domain.com"

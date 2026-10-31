@@ -94,7 +94,7 @@ module Unregister =
                 |> Database.Users.tryDelete
                 |> IO.someOr NotFound
 
-            logger.LogInformation("Deleted user {UserId}.", UserId.asString userId)
+            logger.LogInformation("Unregistered user {UserId}.", UserId.asString userId)
 
             return NoContent
         }

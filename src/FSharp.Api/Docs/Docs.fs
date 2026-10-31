@@ -23,7 +23,7 @@ module Docs =
                     ]
                     "/user/{userId}", OpenApi.pathItem [
                         HttpMethod.Get, UserPaths.getUser
-                        HttpMethod.Delete, UserPaths.deleteUser
+                        HttpMethod.Delete, UserPaths.unregisterUser
                     ]
                 ],
             Tags = HashSet [ OpenApiTag(Name = "User") ]
