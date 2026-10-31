@@ -45,6 +45,23 @@ module UserTests =
         }
 
     [<Fact>]
+    let ``POST /user should return 400 when the email is invalid`` () =
+        task {
+            let id = Guid.NewGuid()
+            let email = "alicedomain.com"
+
+            use! app = TestApp.create id
+
+            let request =
+                JObj [ "email", JStr email ]
+                |> Json.asStringContent
+
+            do!
+                app.Client.PostAsync("/user", request)
+                |> Task.map (Expect.statusCode HttpStatusCode.BadRequest >> ignore)
+        }
+
+    [<Fact>]
     let ``POST /user should return 409 when the User is already registered`` () =
         task {
             let id = Guid.NewGuid()
