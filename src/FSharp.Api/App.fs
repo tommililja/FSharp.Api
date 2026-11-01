@@ -19,7 +19,7 @@ module App =
     !builder.Services
         .AddScoped<IAppEnv>(fun x ->
             let logging = x.GetRequiredService<ILoggerFactory>()
-            new AppEnv(logging, connectionString) :> IAppEnv
+            new AppEnv(logging, connectionString)
         )
 
     let app = builder.Build()

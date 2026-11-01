@@ -47,14 +47,15 @@ module TestApp =
             do! TestData.execute connectionString resetSql
 
             let output = TestContext.Current.TestOutputHelper
-            let env = TestEnv(guidGen, connectionString, output)
 
             let factory =
                 {
                     new WebApplicationFactory<AppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder.ConfigureTestServices(fun services ->
-                                !services.AddScoped<IAppEnv>(fun _ -> env)
+                                !services.AddScoped<IAppEnv>(fun _ ->
+                                    TestEnv(guidGen, connectionString, output)
+                                )
                             )
                 }
 
