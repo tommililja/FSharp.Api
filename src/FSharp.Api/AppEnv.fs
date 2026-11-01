@@ -1,39 +1,31 @@
 namespace FSharp.Api
 
 open System
-open System.Threading.Tasks
 open Microsoft.Data.SqlClient
 open Microsoft.Extensions.Logging
 
 type AppEnv(factory:ILoggerFactory, cancellationToken, connectionString) =
 
-    let sqlConnection =
+    let sqlConnection = new SqlConnection(connectionString)
+
+    let opened =
         lazy (
             task {
-                let conn = new SqlConnection(connectionString)
-                do! conn.OpenAsync()
-                return conn
+                do! sqlConnection.OpenAsync(cancellationToken)
+                return sqlConnection
             }
         )
 
-    let opened () =
-        if sqlConnection.IsValueCreated && sqlConnection.Value.IsCompletedSuccessfully
-        then Some sqlConnection.Value.Result
-        else None
-
     interface IAppEnv with
-        member _.GetSqlConnection() = sqlConnection.Force()
+        member _.GetSqlConnection() = opened.Force()
         member _.CreateGuid() = Guid.NewGuid()
         member _.GetLogger(name) = factory.CreateLogger(name)
         member _.GetCancellationToken() = cancellationToken
 
     interface IDisposable with
         member _.Dispose() =
-            opened ()
-            |> Option.iter _.Dispose()
+            sqlConnection.Dispose()
 
     interface IAsyncDisposable with
         member _.DisposeAsync() =
-            match opened () with
-            | Some c -> c.DisposeAsync()
-            | None -> ValueTask.CompletedTask
+            sqlConnection.DisposeAsync()

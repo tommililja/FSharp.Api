@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Net.Http
 open FSharp.Api
+open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.DependencyInjection
@@ -52,8 +53,12 @@ module TestApp =
                     new WebApplicationFactory<AppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder.ConfigureTestServices(fun services ->
-                                !services.AddScoped<IAppEnv>(fun _ ->
-                                    TestEnv(guidGen, connectionString, output)
+                                !services.AddScoped<IAppEnv>(fun x ->
+                                    let cancellationToken =
+                                        x.GetRequiredService<IHttpContextAccessor>()
+                                            .HttpContext.RequestAborted
+
+                                    new TestEnv(guidGen, cancellationToken, connectionString, output)
                                 )
                             )
                 }

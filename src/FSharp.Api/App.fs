@@ -23,6 +23,7 @@ module App =
             let cancellationToken =
                 x.GetRequiredService<IHttpContextAccessor>()
                     .HttpContext.RequestAborted
+
             new AppEnv(factory, cancellationToken, connectionString)
         )
 
