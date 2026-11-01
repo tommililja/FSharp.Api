@@ -7,8 +7,7 @@ open FSharp.Api.Core
 open Oxpecker
 open Farse
 
-[<AutoOpen>]
-module Response =
+module EndpointHandlers =
 
     [<Literal>]
     let private JsonContentType =
@@ -71,9 +70,9 @@ module Response =
 [<NoComparison>]
 type ApiResponse =
     | Content of Json
-    | NoContent
+    | ContentStream of IAsyncEnumerable<Json>
     | CreatedAt of location:string
-    | Stream of IAsyncEnumerable<Json>
+    | NoContent
 
 [<NoComparison>]
 type ApiError =
@@ -83,6 +82,7 @@ type ApiError =
     | InternalServerError
 
 module ApiResponse =
+    open EndpointHandlers
 
     let handle = function
         | Content body -> json 200 body
@@ -90,9 +90,10 @@ module ApiResponse =
         | CreatedAt location ->
             setStatusCode 201
             >=> setHttpHeader "Location" location
-        | Stream seq -> stream seq
+        | ContentStream seq -> stream seq
 
 module ApiError =
+    open EndpointHandlers
 
     let handle = function
         | NotFound -> setStatusCode 404

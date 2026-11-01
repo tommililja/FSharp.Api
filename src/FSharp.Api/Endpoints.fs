@@ -3,6 +3,7 @@ namespace FSharp.Api
 open Oxpecker
 
 module Endpoints =
+    open EndpointHandlers
 
     let private docs =
         [

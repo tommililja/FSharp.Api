@@ -73,7 +73,7 @@ module Database =
                     "email", sqlString (Email.asString user.Email)
                 ]
 
-        let get () =
+        let getList () =
             list
                 "
                     SELECT Id, Email

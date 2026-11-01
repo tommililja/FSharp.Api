@@ -83,7 +83,7 @@ module Handlers =
                     users
                     |> TaskSeq.map UserResponse.fromUser
 
-                return Stream response
+                return ContentStream response
             }
 
     module UnregisterUser =
