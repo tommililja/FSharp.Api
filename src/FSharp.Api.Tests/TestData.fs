@@ -1,4 +1,4 @@
-namespace FSharp.Api
+namespace FSharp.Api.Tests
 
 open System
 open Microsoft.Data.SqlClient
