@@ -65,7 +65,7 @@ module UserPaths =
                     "400", OpenApiResponse(Description = "Invalid request body.")
                     "409", OpenApiResponse(Description = "User already registered.")
                 ],
-            Tags = OpenApi.tagRefs [ "User" ]
+            Tags = OpenApi.tagRefs [ "Users" ]
         )
 
     let getUser =
@@ -81,7 +81,7 @@ module UserPaths =
                     "200", OpenApi.jsonResponse "The user." userSchema
                     "404", OpenApiResponse(Description = "User not found.")
                 ],
-            Tags = OpenApi.tagRefs [ "User" ]
+            Tags = OpenApi.tagRefs [ "Users" ]
         )
 
     let getUsers =
@@ -94,7 +94,7 @@ module UserPaths =
                         OpenApi.jsonResponse "All users."
                             (OpenApiSchema(Type = JsonSchemaType.Array, Items = userSchema))
                 ],
-            Tags = OpenApi.tagRefs [ "User" ]
+            Tags = OpenApi.tagRefs [ "Users" ]
         )
 
     let unregisterUser =
@@ -110,5 +110,5 @@ module UserPaths =
                     "204", OpenApiResponse(Description = "User unregistered.")
                     "404", OpenApiResponse(Description = "User not found.")
                 ],
-            Tags = OpenApi.tagRefs [ "User" ]
+            Tags = OpenApi.tagRefs [ "Users" ]
         )
