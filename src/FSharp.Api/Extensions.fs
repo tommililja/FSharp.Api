@@ -53,3 +53,12 @@ module Effect =
             let! r = Option.asResult e x
             return r
         }
+
+    let noneOr e (effect:Effect<_, _ option, _>) =
+        eff {
+            let! x = effect
+            return!
+                match x with
+                | Some _ -> Error e
+                | None -> Ok ()
+        }

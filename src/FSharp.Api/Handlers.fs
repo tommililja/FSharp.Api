@@ -33,13 +33,10 @@ module Handlers =
             eff {
                 let! logger = Logger.get "Handlers.RegisterUser"
 
-                let! user =
+                do!
                     request.Email
                     |> Database.Users.tryGetByEmail
-
-                if user.IsSome then
-                    logger.LogWarning("User is already registered.")
-                    do! Error Conflict
+                    |> Effect.noneOr Conflict
 
                 let! userId = Guid.create ()
 
