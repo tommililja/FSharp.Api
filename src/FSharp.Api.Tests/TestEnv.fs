@@ -6,9 +6,8 @@ open FSharp.Api
 open FSharp.Control
 open Meziantou.Extensions.Logging.Xunit.v3
 open Microsoft.Data.SqlClient
-open Xunit
 
-type TestEnv(guid:Guid, connectionString:string, output:ITestOutputHelper) =
+type TestEnv(guidGen, connectionString, output) =
 
     let connection =
         lazy (
@@ -19,9 +18,9 @@ type TestEnv(guid:Guid, connectionString:string, output:ITestOutputHelper) =
             }
         )
 
-    interface IIOEnv with
+    interface IAppEnv with
         member _.GetSqlConnection() = connection.Force()
-        member _.CreateGuid() = guid
+        member _.CreateGuid() = GuidGen.generate guidGen
         member _.GetLogger _ = XUnitLogger.CreateLogger(output)
 
     interface IAsyncDisposable with

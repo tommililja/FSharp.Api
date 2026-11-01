@@ -6,8 +6,8 @@ open System.Net.Http
 open System.Text.Json
 open System.Threading
 open System.Threading.Tasks
-open Json.Schema
 open Microsoft.OpenApi
+open Json.Schema
 
 module private PathTemplate =
 

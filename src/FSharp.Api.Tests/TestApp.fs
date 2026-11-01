@@ -11,7 +11,7 @@ open Microsoft.Extensions.DependencyInjection
 open Testcontainers.MsSql
 open Xunit
 
-type TestApp(factory:WebApplicationFactory<IOEnv>, connectionString:string, client:HttpClient) =
+type TestApp(factory:WebApplicationFactory<AppEnv>, connectionString:string, client:HttpClient) =
     interface IDisposable with
         member _.Dispose() =
             client.Dispose()
@@ -40,21 +40,21 @@ module TestApp =
 
     let private resetSql = File.ReadAllText "Scripts/ResetTables.sql"
 
-    let create id =
+    let create guidGen =
         task {
             let! connectionString = start.Value
 
             do! TestData.execute connectionString resetSql
 
             let output = TestContext.Current.TestOutputHelper
+            let env = TestEnv(guidGen, connectionString, output)
 
             let factory =
                 {
-                    new WebApplicationFactory<IOEnv>() with
+                    new WebApplicationFactory<AppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder.ConfigureTestServices(fun services ->
-                                !services.AddScoped<IIOEnv>(fun _ ->
-                                    TestEnv(id, connectionString, output) :> IIOEnv)
+                                !services.AddScoped<IAppEnv>(fun _ -> env)
                             )
                 }
 

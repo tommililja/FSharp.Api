@@ -1,4 +1,4 @@
-namespace FSharp.Api
+﻿namespace FSharp.Api
 
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Configuration
@@ -17,9 +17,9 @@ module App =
             .GetConnectionString("DefaultConnection")
 
     !builder.Services
-        .AddScoped<IIOEnv>(fun x ->
+        .AddScoped<IAppEnv>(fun x ->
             let logging = x.GetRequiredService<ILoggerFactory>()
-            new IOEnv(logging, connectionString) :> IIOEnv
+            new AppEnv(logging, connectionString) :> IAppEnv
         )
 
     let app = builder.Build()

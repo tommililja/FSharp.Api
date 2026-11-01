@@ -4,6 +4,7 @@ open System
 open System.Threading.Tasks
 open Microsoft.Data.SqlClient
 open Microsoft.Extensions.Logging
+open FSharp.Api.Core
 
 type ILogging =
     abstract GetLogger: string -> ILogger
@@ -35,12 +36,12 @@ module Guid =
             env.CreateGuid()
         )
 
-type IIOEnv =
+type IAppEnv =
     inherit IGuid
     inherit ISqlConnection
     inherit ILogging
 
-type IOEnv(logging:ILoggerFactory, connectionString) =
+type AppEnv(logging:ILoggerFactory, connectionString) =
 
     let sqlConnection =
         lazy (
@@ -56,7 +57,7 @@ type IOEnv(logging:ILoggerFactory, connectionString) =
         then Some sqlConnection.Value.Result
         else None
 
-    interface IIOEnv with
+    interface IAppEnv with
         member _.GetSqlConnection() = sqlConnection.Force()
         member _.CreateGuid() = Guid.NewGuid()
         member _.GetLogger(name) = logging.CreateLogger(name)

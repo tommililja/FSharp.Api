@@ -3,6 +3,7 @@
 open System
 open System.Net
 open FSharp.Api
+open FSharp.Api.Core
 open Xunit
 open Expecto.Flip
 open Farse
@@ -12,10 +13,12 @@ module UserTests =
     [<Fact>]
     let ``POST /users should register a User and return 201 with the correct location`` () =
         task {
-            let id = Guid.NewGuid()
+            let id = Guid.NewGuid ()
             let email = "alice@domain.com"
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             let request =
                 JObj [ "email", JStr email ]
@@ -46,7 +49,9 @@ module UserTests =
             let id = Guid.NewGuid()
             let email = "alicedomain.com"
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             let request =
                 JObj [ "email", JStr email ]
@@ -63,7 +68,9 @@ module UserTests =
             let id = Guid.NewGuid()
             let email = "alice@domain.com"
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             do! TestData.insertUser id email app.ConnectionString
 
@@ -81,7 +88,9 @@ module UserTests =
         task {
             let id = Guid.NewGuid()
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             do! TestData.insertUsers 100 app.ConnectionString
 
@@ -103,7 +112,9 @@ module UserTests =
         task {
             let id = Guid.NewGuid()
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString id}")
 
@@ -116,7 +127,9 @@ module UserTests =
             let id = Guid.NewGuid()
             let email = "alice@domain.com"
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             do! TestData.insertUser id email app.ConnectionString
 
@@ -132,7 +145,9 @@ module UserTests =
         task {
             let id = Guid.NewGuid()
 
-            use! app = TestApp.create id
+            use! app =
+                GuidGen.always id
+                |> TestApp.create
 
             let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString id}")
 
