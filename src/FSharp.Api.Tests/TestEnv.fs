@@ -1,7 +1,6 @@
 namespace FSharp.Api.Tests
 
 open System
-open System.Threading
 open FSharp.Api
 open FSharp.Control
 open Meziantou.Extensions.Logging.Xunit.v3
@@ -23,7 +22,7 @@ type TestEnv(guidGen, cancellationToken, connectionString, output) =
         member _.GetSqlConnection() = opened.Force()
         member _.CreateGuid() = GuidGen.generate guidGen
         member _.GetLogger _ = XUnitLogger.CreateLogger(output)
-        member _.GetCancellationToken() = CancellationToken.None
+        member _.GetCancellationToken() = cancellationToken
 
     interface IDisposable with
         member _.Dispose() =
