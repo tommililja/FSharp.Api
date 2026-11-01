@@ -1,10 +1,11 @@
-﻿namespace FSharp.Api
+namespace FSharp.Api
 
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open FSharp.Api.Core
 open Oxpecker
 
 module App =

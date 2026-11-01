@@ -1,4 +1,4 @@
-namespace FSharp.Api
+namespace FSharp.Api.Core
 
 open System
 open System.Threading.Tasks
@@ -117,7 +117,7 @@ module IOBuilder =
         member _.ReturnFrom(x:Result<_, _>) = fromResult x
 
         member _.Delay(fn:unit -> IO<_, _, _>) = IO (fun c -> run c (fn ()))
-        member _.Combine(a:IO<'c, unit, 'e>, b: IO<'c, 'r, 'e>) = bind (fun () -> b) a
+        member _.Combine(a:IO<'c, unit, 'e>, b:IO<'c, 'r, 'e>) = bind (fun () -> b) a
 
         member _.Zero() = from ()
 

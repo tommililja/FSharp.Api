@@ -1,6 +1,7 @@
 namespace FSharp.Api
 
 open FSharp.Control
+open FSharp.Api.Core
 open Microsoft.Extensions.Logging
 open Farse
 open Farse.Operators

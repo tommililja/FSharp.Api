@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Net.Http
 open FSharp.Api
+open FSharp.Api.Core
 open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.DependencyInjection

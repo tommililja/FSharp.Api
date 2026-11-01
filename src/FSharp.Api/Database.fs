@@ -4,6 +4,7 @@ open System.Data
 open System.Data.Common
 open Donald
 open FSharp.Control
+open FSharp.Api.Core
 
 module Database =
 

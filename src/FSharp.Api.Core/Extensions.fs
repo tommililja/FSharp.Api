@@ -1,4 +1,4 @@
-namespace FSharp.Api
+namespace FSharp.Api.Core
 
 open System
 open System.Threading.Tasks
