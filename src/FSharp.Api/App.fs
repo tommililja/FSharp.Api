@@ -16,11 +16,14 @@ module App =
         builder.Configuration
             .GetConnectionString("DefaultConnection")
 
+    !builder.Services.AddHttpContextAccessor()
     !builder.Services
         .AddScoped<IAppEnv>(fun x ->
-            let logging = x.GetRequiredService<ILoggerFactory>()
-            let accessor = x.GetRequiredService<IHttpContextAccessor>()
-            new AppEnv(logging, accessor.HttpContext, connectionString)
+            let factory = x.GetRequiredService<ILoggerFactory>()
+            let cancellationToken =
+                x.GetRequiredService<IHttpContextAccessor>()
+                    .HttpContext.RequestAborted
+            new AppEnv(factory, cancellationToken, connectionString)
         )
 
     let app = builder.Build()
