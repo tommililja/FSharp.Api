@@ -2,10 +2,11 @@ namespace FSharp.Api
 
 open System
 open System.Threading.Tasks
+open Microsoft.AspNetCore.Http
 open Microsoft.Data.SqlClient
 open Microsoft.Extensions.Logging
 
-type AppEnv(logging:ILoggerFactory, connectionString) =
+type AppEnv(logging:ILoggerFactory, httpContext:HttpContext, connectionString) =
 
     let sqlConnection =
         lazy (
@@ -25,6 +26,7 @@ type AppEnv(logging:ILoggerFactory, connectionString) =
         member _.GetSqlConnection() = sqlConnection.Force()
         member _.CreateGuid() = Guid.NewGuid()
         member _.GetLogger(name) = logging.CreateLogger(name)
+        member _.GetCancellationToken() = httpContext.RequestAborted
 
     interface IDisposable with
         member _.Dispose() =

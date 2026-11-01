@@ -1,6 +1,7 @@
 namespace FSharp.Api.Tests
 
 open System
+open System.Threading
 open System.Threading.Tasks
 open FSharp.Api
 open FSharp.Control
@@ -22,6 +23,7 @@ type TestEnv(guidGen, connectionString, output) =
         member _.GetSqlConnection() = connection.Force()
         member _.CreateGuid() = GuidGen.generate guidGen
         member _.GetLogger _ = XUnitLogger.CreateLogger(output)
+        member _.GetCancellationToken() = CancellationToken.None
 
     interface IAsyncDisposable with
         member _.DisposeAsync() =

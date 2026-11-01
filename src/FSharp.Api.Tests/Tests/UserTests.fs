@@ -3,7 +3,6 @@
 open System
 open System.Net
 open FSharp.Api
-open FSharp.Api.Core
 open Xunit
 open Expecto.Flip
 open Farse

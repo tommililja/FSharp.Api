@@ -2,7 +2,6 @@ namespace FSharp.Api
 
 open System
 open System.Text.RegularExpressions
-open FSharp.Api.Core
 
 type AggregateId = AggregateId of Guid
 

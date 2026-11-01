@@ -6,7 +6,6 @@
         <File Path="..\.gitignore" />
         <File Path="..\.editorconfig" />
     </Folder>
-    <Project Path="FSharp.Api.Core/FSharp.Api.Core.fsproj" />
     <Project Path="FSharp.Api.Tests/FSharp.Api.Tests.fsproj" />
     <Project Path="FSharp.Api/FSharp.Api.fsproj" />
 </Solution>

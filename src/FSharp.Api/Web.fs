@@ -3,7 +3,7 @@ namespace FSharp.Api
 open System.Collections.Generic
 open System.Text.Json
 open FSharp.Control
-open FSharp.Api.Core
+open Orsak
 open Oxpecker
 open Farse
 
@@ -107,16 +107,14 @@ module ApiError =
 [<AutoOpen>]
 module Routing =
 
-    let private resolve io : EndpointHandler =
+    let private resolve eff : EndpointHandler =
         fun ctx ->
             task {
-                let runner = ctx.GetService<IAppEnv>()
+                let env = ctx.GetService<IAppEnv>()
 
                 let! result =
-                    io
-                    |> IO.run runner
-                    |> AsyncResult.asAsync
-                    |> Async.startAsTask ctx.RequestAborted
+                    eff
+                    |> Effect.run env
 
                 let handler:EndpointHandler =
                     match result with

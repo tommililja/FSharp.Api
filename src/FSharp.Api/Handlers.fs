@@ -1,10 +1,10 @@
 namespace FSharp.Api
 
 open FSharp.Control
-open FSharp.Api.Core
 open Microsoft.Extensions.Logging
 open Farse
 open Farse.Operators
+open Orsak
 
 module Handlers =
 
@@ -30,7 +30,7 @@ module Handlers =
             }
 
         let handle request =
-            io {
+            eff {
                 let! logger = Logger.get "Handlers.RegisterUser"
 
                 let! user =
@@ -58,13 +58,13 @@ module Handlers =
     module GetUser =
 
         let handle userId =
-            io {
+            eff {
                 let! logger = Logger.get "Handlers.GetUser"
 
                 let! user =
                     userId
                     |> Database.Users.tryGet
-                    |> IO.someOr NotFound
+                    |> Effect.someOr NotFound
 
                 logger.LogInformation("Found user {UserId}.", UserId.asString user.Id)
 
@@ -76,7 +76,7 @@ module Handlers =
     module GetUsers =
 
         let handle () =
-            io {
+            eff {
                 let! users = Database.Users.getStream ()
 
                 let response =
@@ -89,12 +89,12 @@ module Handlers =
     module UnregisterUser =
 
         let handle userId =
-            io {
+            eff {
                 let! logger = Logger.get "Handlers.UnregisterUser"
 
                 do! userId
                     |> Database.Users.tryDelete
-                    |> IO.someOr NotFound
+                    |> Effect.someOr NotFound
 
                 logger.LogInformation("Unregistered user {UserId}.", UserId.asString userId)
 

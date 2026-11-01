@@ -2,16 +2,16 @@ namespace FSharp.Api
 
 open System.Data
 open System.Data.Common
-open Donald
 open FSharp.Control
-open FSharp.Api.Core
+open Donald
+open Orsak
 
 module Database =
 
     let private command sql param =
-        io {
+        eff {
             let! conn = SqlConnection.get ()
-            let! token = Async.CancellationToken
+            let! token = CancellationToken.get ()
             return
                 conn
                 |> Db.newCommand sql
@@ -20,25 +20,26 @@ module Database =
         }
 
     let private exec sql param =
-        io {
+        eff {
             let! cmd = command sql param
             return! Db.Async.exec cmd
         }
 
     let private trySingle sql param map =
-        io {
+        eff {
             let! cmd = command sql param
-            return! Db.Async.querySingle map cmd
+            let! x = Db.Async.querySingle map cmd
+            return x
         }
 
     let private list sql param map =
-        io {
+        eff {
             let! cmd = command sql param
             return! Db.Async.query map cmd
         }
 
     let private stream sql param map =
-        io {
+        eff {
             let! dbUnit = command sql param
             let token = dbUnit.CancellationToken
             let cmd = dbUnit.Command :?> DbCommand

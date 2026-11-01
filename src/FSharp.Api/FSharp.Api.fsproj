@@ -7,6 +7,7 @@
         <Compile Include="Docs\UserPaths.fs" />
         <Compile Include="Docs\Docs.fs" />
         <Compile Include="Types.fs" />
+        <Compile Include="Extensions.fs" />
         <Compile Include="Web.fs" />
         <Compile Include="Domain.fs" />
         <Compile Include="Database.fs" />
@@ -21,11 +22,9 @@
       <PackageReference Include="FSharp.Control.TaskSeq" Version="1.1.1" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
       <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
+      <PackageReference Include="Orsak" Version="0.7.0" />
       <PackageReference Include="Oxpecker" Version="2.1.1" />
       <PackageReference Update="FSharp.Core" Version="10.1.403" />
       <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\FSharp.Api.Core\FSharp.Api.Core.fsproj" />
     </ItemGroup>
 </Project>

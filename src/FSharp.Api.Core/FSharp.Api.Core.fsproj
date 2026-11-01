@@ -3,7 +3,6 @@
         <TargetFramework>net10.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Extensions.fs" />
-        <Compile Include="IO.fs" />
+      <PackageReference Include="Orsak" Version="0.7.0" />
     </ItemGroup>
 </Project>
