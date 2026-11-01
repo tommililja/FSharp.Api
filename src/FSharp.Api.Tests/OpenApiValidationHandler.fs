@@ -1,6 +1,7 @@
 namespace FSharp.Api.Tests
 
 open System
+open System.Collections.Concurrent
 open System.Net.Http
 open System.Text.Json
 open System.Threading
