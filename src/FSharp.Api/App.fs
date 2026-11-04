@@ -16,8 +16,9 @@ module App =
         builder.Configuration
             .GetConnectionString("DefaultConnection")
 
-    !builder.Services.AddHttpContextAccessor()
     !builder.Services
+        .AddHttpContextAccessor()
+        .AddProblemDetails()
         .AddScoped<IAppEnv>(fun x ->
             let factory = x.GetRequiredService<ILoggerFactory>()
             let cancellationToken =

@@ -53,13 +53,22 @@ module TestApp =
                     new WebApplicationFactory<AppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder.ConfigureTestServices(fun services ->
-                                !services.AddScoped<IAppEnv>(fun x ->
-                                    let cancellationToken =
-                                        x.GetRequiredService<IHttpContextAccessor>()
-                                            .HttpContext.RequestAborted
+                                !services
+                                    .PostConfigure<ProblemDetailsOptions>(fun options ->
+                                        let existing = options.CustomizeProblemDetails
+                                        options.CustomizeProblemDetails <-
+                                            Action<ProblemDetailsContext>(fun context ->
+                                                if not (isNull existing) then existing.Invoke(context)
+                                                context.ProblemDetails.Extensions["traceId"] <- box "test-trace-id"
+                                            )
+                                    )
+                                    .AddScoped<IAppEnv>(fun x ->
+                                        let cancellationToken =
+                                            x.GetRequiredService<IHttpContextAccessor>()
+                                                .HttpContext.RequestAborted
 
-                                    new TestEnv(guidGen, cancellationToken, connectionString, output)
-                                )
+                                        new TestEnv(guidGen, cancellationToken, connectionString, output)
+                                    )
                             )
                 }
 

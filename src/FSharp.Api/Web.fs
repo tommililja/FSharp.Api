@@ -3,6 +3,7 @@ namespace FSharp.Api
 open System.Collections.Generic
 open System.Text.Json
 open FSharp.Control
+open Microsoft.AspNetCore.Http
 open Orsak
 open Oxpecker
 open Farse
@@ -12,6 +13,20 @@ module EndpointHandlers =
     [<Literal>]
     let private JsonContentType =
         "application/json; charset=utf-8"
+
+    let problemDetails details (statusCode:int) (errors:ParseError list) : EndpointHandler =
+        fun ctx ->
+            let errors =
+                errors
+                |> List.map (_.Path >> JsonPath.asString)
+                |> List.distinct
+                |> List.map (fun path -> path, [| "The value is missing or invalid." |])
+
+            Results.ValidationProblem(dict errors,
+                detail = defaultArg details null,
+                instance = ctx.Request.Path.Value,
+                statusCode = statusCode
+            ).ExecuteAsync(ctx)
 
     let json statusCode json : EndpointHandler =
         fun ctx ->
@@ -74,11 +89,11 @@ type ApiResponse =
     | CreatedAt of location:string
     | NoContent
 
-[<NoComparison>]
+[<NoComparison; NoEquality>]
 type ApiError =
     | NotFound
-    | BadRequest of Json option
-    | Conflict
+    | BadRequest of details:string option * ParseError list
+    | Conflict of string
     | InternalServerError
 
 module ApiResponse =
@@ -96,12 +111,9 @@ module ApiError =
     open EndpointHandlers
 
     let handle = function
-        | NotFound -> setStatusCode 404
-        | BadRequest body ->
-            match body with
-            | Some body -> json 400 body
-            | None -> setStatusCode 400
-        | Conflict -> setStatusCode 409
+        | NotFound -> problemDetails (Some "Resource not found.") 404 []
+        | BadRequest (details, errors) -> problemDetails details 400 errors
+        | Conflict msg -> problemDetails (Some msg) 409 []
         | InternalServerError -> setStatusCode 500
 
 [<AutoOpen>]
@@ -112,11 +124,9 @@ module Routing =
             task {
                 let env = ctx.GetService<IAppEnv>()
 
-                let! result =
-                    eff
-                    |> Effect.run env
+                let! result = eff |> Effect.run env
 
-                let handler:EndpointHandler =
+                let handler =
                     match result with
                     | Ok x -> ApiResponse.handle x
                     | Error e -> ApiError.handle e
@@ -135,7 +145,7 @@ module Routing =
             resolve handler ctx
         )
 
-    // Short for route + parse body + resolve.
+    // Short for route + parse ctx + resolve.
     let routeb path parser handler : Endpoint =
         route path (fun ctx ->
             task {
@@ -148,9 +158,15 @@ module Routing =
                 let response =
                     match request with
                     | Ok x -> handler x |> resolve
-                    | Error _ ->
-                        // TODO: Return schema error.
-                        BadRequest None |> ApiError.handle
+                    | Error e ->
+                        let details =
+                            match e with
+                            | Json _ -> Some "Invalid JSON.", []
+                            | Errors list -> Some "Invalid request body.", list
+
+                        details
+                        |> BadRequest
+                        |> ApiError.handle
 
                 return! response ctx
             }

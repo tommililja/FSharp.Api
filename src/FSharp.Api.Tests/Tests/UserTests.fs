@@ -1,5 +1,7 @@
 ﻿namespace FSharp.Api.Tests
 
+#nowarn 3391
+
 open System
 open System.Net
 open FSharp.Api
@@ -12,11 +14,11 @@ module UserTests =
     [<Fact>]
     let ``POST /users should register a User and return 201 with the correct location`` () =
         task {
-            let id = Guid.NewGuid ()
+            let userId = Guid.NewGuid ()
             let email = "alice@domain.com"
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
             let request =
@@ -33,7 +35,7 @@ module UserTests =
 
             let expected =
                 JObj [
-                    "id", JStr (Guid.asString id)
+                    "id", JStr (Guid.asString userId)
                     "email", JStr email
                 ]
 
@@ -45,11 +47,11 @@ module UserTests =
     [<Fact>]
     let ``POST /users should return 400 when the email is invalid`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
             let email = "alicedomain.com"
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
             let request =
@@ -57,38 +59,71 @@ module UserTests =
                 |> Json.asStringContent
 
             let! register = app.Client.PostAsync("/users", request)
+            let! json = HttpResponseMessage.asJson register
+
+            let expected =
+                JObj [
+                    "errors",
+                        JObj [
+                            "$.email", JStr.array id [ "The value is missing or invalid." ]
+                        ]
+                    "detail", JStr "Invalid request body."
+                    "instance", JStr "/users"
+                    "status", JNum 400
+                    "title", JStr "One or more validation errors occurred."
+                    "traceId", JStr "test-trace-id"
+                    "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+                ]
+
+            let actual = json |> Expect.wantOk "Expected valid JSON."
 
             Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
+            Expect.equalJson actual expected
         }
 
     [<Fact>]
     let ``POST /users should return 409 when the User is already registered`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
             let email = "alice@domain.com"
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
-            do! TestData.insertUser id email app.ConnectionString
+            do! TestData.insertUser userId email app.ConnectionString
 
             let request =
                 JObj [ "email", JStr email ]
                 |> Json.asStringContent
 
             let! register = app.Client.PostAsync("/users", request)
+            let! json = HttpResponseMessage.asJson register
+
+            let expected =
+                JObj [
+                    "detail", JStr "User is already registered."
+                    "errors", JObj.empty
+                    "instance", JStr "/users"
+                    "status", JNum 409
+                    "title", JStr "One or more validation errors occurred."
+                    "traceId", JStr "test-trace-id"
+                    "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.10"
+                ]
+
+            let actual = json |> Expect.wantOk "Expected valid JSON."
 
             Expect.equal "Expected equal status codes." HttpStatusCode.Conflict register.StatusCode
+            Expect.equalJson actual expected
         }
 
     [<Fact>]
     let ``GET /users should return all Users`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
             do! TestData.insertUsers 100 app.ConnectionString
@@ -109,46 +144,76 @@ module UserTests =
     [<Fact>]
     let ``GET /users/id should return 404 when the User is not found`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
-            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString id}")
+            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString userId}")
+            let! json = HttpResponseMessage.asJson getUser
+
+            let expected =
+                JObj [
+                    "detail", JStr "Resource not found."
+                    "errors", JObj.empty
+                    "instance", JStr $"/users/%s{Guid.asString userId}"
+                    "status", JNum 404
+                    "title", JStr "One or more validation errors occurred."
+                    "traceId", JStr "test-trace-id"
+                    "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
+                ]
+
+            let actual = json |> Expect.wantOk "Expected valid JSON."
 
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
+            Expect.equalJson actual expected
         }
 
     [<Fact>]
     let ``DELETE /users/id should unregister the User and return 204`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
             let email = "alice@domain.com"
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
-            do! TestData.insertUser id email app.ConnectionString
+            do! TestData.insertUser userId email app.ConnectionString
 
-            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString id}")
+            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString userId}")
             Expect.equal "Expected equal status codes." HttpStatusCode.NoContent unregister.StatusCode
 
-            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString id}")
+            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString userId}")
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
     let ``DELETE /users/id should return 404 when the user is not found`` () =
         task {
-            let id = Guid.NewGuid()
+            let userId = Guid.NewGuid()
 
             use! app =
-                GuidGen.always id
+                GuidGen.always userId
                 |> TestApp.create
 
-            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString id}")
+            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString userId}")
+            let! json = HttpResponseMessage.asJson unregister
+
+            let expected =
+                JObj [
+                    "detail", JStr "Resource not found."
+                    "errors", JObj.empty
+                    "instance", JStr $"/users/%s{Guid.asString userId}"
+                    "status", JNum 404
+                    "title", JStr "One or more validation errors occurred."
+                    "traceId", JStr "test-trace-id"
+                    "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
+                ]
+
+            let actual = json |> Expect.wantOk "Expected valid JSON."
 
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound unregister.StatusCode
+            Expect.equalJson actual expected
         }

@@ -36,7 +36,7 @@ module Handlers =
                 do!
                     request.Email
                     |> Database.Users.tryGetByEmail
-                    |> Effect.noneOr Conflict
+                    |> Effect.noneOr (Conflict "User is already registered.")
 
                 let! userId = Guid.create ()
 

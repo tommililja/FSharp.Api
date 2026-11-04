@@ -52,6 +52,14 @@ module OpenApi =
             ]
         )
 
+    let problemJsonResponse description =
+        OpenApiResponse(
+            Description = description,
+            Content = dict [
+                "application/problem+json", OpenApiMediaType()
+            ]
+        )
+
     let jsonRequest schema =
         OpenApiRequestBody(
             Required = true,
