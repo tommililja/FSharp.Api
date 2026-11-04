@@ -14,18 +14,26 @@ module EndpointHandlers =
     let private JsonContentType =
         "application/json; charset=utf-8"
 
-    let problemDetails details (statusCode:int) (errors:ParseError list) : EndpointHandler =
+    let validationProblem detail errors : EndpointHandler =
         fun ctx ->
-            let errors =
+            let errors : IDictionary<string, string[]> =
                 errors
                 |> List.map (_.Path >> JsonPath.asString)
                 |> List.distinct
                 |> List.map (fun path -> path, [| "The value is missing or invalid." |])
+                |> dict
 
-            Results.ValidationProblem(dict errors,
-                detail = defaultArg details null,
-                instance = ctx.Request.Path.Value,
-                statusCode = statusCode
+            Results.ValidationProblem(errors,
+                detail = detail,
+                instance = ctx.Request.Path.Value
+            ).ExecuteAsync(ctx)
+
+    let problem (statusCode:int) detail : EndpointHandler =
+        fun ctx ->
+            Results.Problem(
+                statusCode = statusCode,
+                detail = detail,
+                instance = ctx.Request.Path.Value
             ).ExecuteAsync(ctx)
 
     let json statusCode json : EndpointHandler =
@@ -92,8 +100,8 @@ type ApiResponse =
 [<NoComparison; NoEquality>]
 type ApiError =
     | NotFound
-    | BadRequest of details:string option * ParseError list
-    | Conflict of string
+    | BadRequest of detail:string * ParseError list
+    | Conflict of detail:string
     | InternalServerError
 
 module ApiResponse =
@@ -111,10 +119,10 @@ module ApiError =
     open EndpointHandlers
 
     let handle = function
-        | NotFound -> problemDetails (Some "Resource not found.") 404 []
-        | BadRequest (details, errors) -> problemDetails details 400 errors
-        | Conflict msg -> problemDetails (Some msg) 409 []
-        | InternalServerError -> setStatusCode 500
+        | NotFound -> problem 404 "Resource not found."
+        | BadRequest (detail, errors) -> validationProblem detail errors
+        | Conflict detail -> problem 409 detail
+        | InternalServerError -> problem 500 "An unexpected error occurred."
 
 [<AutoOpen>]
 module Routing =
@@ -161,8 +169,8 @@ module Routing =
                     | Error e ->
                         let details =
                             match e with
-                            | Json _ -> Some "Invalid JSON.", []
-                            | Errors list -> Some "Invalid request body.", list
+                            | Json _ -> "Invalid JSON.", []
+                            | Errors list -> "Invalid request body.", list
 
                         details
                         |> BadRequest

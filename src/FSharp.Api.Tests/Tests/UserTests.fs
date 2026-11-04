@@ -103,10 +103,9 @@ module UserTests =
             let expected =
                 JObj [
                     "detail", JStr "User is already registered."
-                    "errors", JObj.empty
                     "instance", JStr "/users"
                     "status", JNum 409
-                    "title", JStr "One or more validation errors occurred."
+                    "title", JStr "Conflict"
                     "traceId", JStr "test-trace-id"
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.10"
                 ]
@@ -156,10 +155,9 @@ module UserTests =
             let expected =
                 JObj [
                     "detail", JStr "Resource not found."
-                    "errors", JObj.empty
                     "instance", JStr $"/users/%s{Guid.asString userId}"
                     "status", JNum 404
-                    "title", JStr "One or more validation errors occurred."
+                    "title", JStr "Not Found"
                     "traceId", JStr "test-trace-id"
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
@@ -204,10 +202,9 @@ module UserTests =
             let expected =
                 JObj [
                     "detail", JStr "Resource not found."
-                    "errors", JObj.empty
                     "instance", JStr $"/users/%s{Guid.asString userId}"
                     "status", JNum 404
-                    "title", JStr "One or more validation errors occurred."
+                    "title", JStr "Not Found"
                     "traceId", JStr "test-trace-id"
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
