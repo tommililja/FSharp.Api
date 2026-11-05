@@ -120,7 +120,10 @@ module ApiError =
 
     let handle = function
         | NotFound -> problem 404 "Resource not found."
-        | BadRequest (detail, errors) -> validationProblem detail errors
+        | BadRequest (detail, errors) ->
+            match errors with
+            | [] -> problem 400 detail
+            | items -> validationProblem detail items
         | Conflict detail -> problem 409 detail
         | InternalServerError -> problem 500 "An unexpected error occurred."
 
@@ -167,12 +170,12 @@ module Routing =
                     match request with
                     | Ok x -> handler x |> resolve
                     | Error e ->
-                        let details =
+                        let detail =
                             match e with
                             | Json _ -> "Invalid JSON.", []
                             | Errors list -> "Invalid request body.", list
 
-                        details
+                        detail
                         |> BadRequest
                         |> ApiError.handle
 
