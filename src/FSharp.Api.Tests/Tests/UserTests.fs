@@ -4,6 +4,7 @@
 
 open System
 open System.Net
+open System.Net.Http
 open FSharp.Api
 open Xunit
 open Expecto.Flip
@@ -73,6 +74,36 @@ module UserTests =
                     "instance", JStr "/users"
                     "status", JNum 400
                     "title", JStr "One or more validation errors occurred."
+                    "traceId", JStr "test-trace-id"
+                    "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+                ]
+
+            Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
+            Expect.equalJson expected actual
+        }
+
+    [<Fact>]
+    let ``POST /users should return 400 when the JSON is invalid`` () =
+        task {
+            let userId = Guid.NewGuid()
+
+            use! app =
+                GuidGen.always userId
+                |> TestApp.create
+
+            let request = new StringContent("""{ "email: }""")
+
+            let! register = app.Client.PostAsync("/users", request)
+            let! json = HttpResponseMessage.asJson register
+
+            let actual = json |> Expect.wantOk "Expected valid JSON."
+
+            let expected =
+                JObj [
+                    "detail", JStr "Invalid JSON."
+                    "instance", JStr "/users"
+                    "status", JNum 400
+                    "title", JStr "Bad Request"
                     "traceId", JStr "test-trace-id"
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
                 ]
