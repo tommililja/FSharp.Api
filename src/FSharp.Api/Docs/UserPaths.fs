@@ -62,7 +62,7 @@ module UserPaths =
                                 Schema = OpenApiSchema(Type = JsonSchemaType.String)
                             )
                         ])
-                    "400", OpenApi.problemJsonResponse "Invalid request body."
+                    "400", OpenApi.validationProblemJsonResponse "Invalid request body."
                     "409", OpenApi.problemJsonResponse "User already registered."
                 ],
             Tags = OpenApi.tagRefs [ "Users" ]
