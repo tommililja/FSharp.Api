@@ -61,6 +61,8 @@ module UserTests =
             let! register = app.Client.PostAsync("/users", request)
             let! json = HttpResponseMessage.asJson register
 
+            let actual = json |> Expect.wantOk "Expected valid JSON."
+
             let expected =
                 JObj [
                     "errors",
@@ -75,10 +77,8 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
                 ]
 
-            let actual = json |> Expect.wantOk "Expected valid JSON."
-
             Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
-            Expect.equalJson actual expected
+            Expect.equalJson expected actual
         }
 
     [<Fact>]
@@ -100,6 +100,8 @@ module UserTests =
             let! register = app.Client.PostAsync("/users", request)
             let! json = HttpResponseMessage.asJson register
 
+            let actual = json |> Expect.wantOk "Expected valid JSON."
+
             let expected =
                 JObj [
                     "detail", JStr "User is already registered."
@@ -110,10 +112,8 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.10"
                 ]
 
-            let actual = json |> Expect.wantOk "Expected valid JSON."
-
             Expect.equal "Expected equal status codes." HttpStatusCode.Conflict register.StatusCode
-            Expect.equalJson actual expected
+            Expect.equalJson expected actual
         }
 
     [<Fact>]
@@ -152,6 +152,8 @@ module UserTests =
             let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString userId}")
             let! json = HttpResponseMessage.asJson getUser
 
+            let actual = json |> Expect.wantOk "Expected valid JSON."
+
             let expected =
                 JObj [
                     "detail", JStr "Resource not found."
@@ -162,10 +164,8 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
 
-            let actual = json |> Expect.wantOk "Expected valid JSON."
-
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
-            Expect.equalJson actual expected
+            Expect.equalJson expected actual
         }
 
     [<Fact>]
@@ -199,6 +199,8 @@ module UserTests =
             let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString userId}")
             let! json = HttpResponseMessage.asJson unregister
 
+            let actual = json |> Expect.wantOk "Expected valid JSON."
+
             let expected =
                 JObj [
                     "detail", JStr "Resource not found."
@@ -209,8 +211,6 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
 
-            let actual = json |> Expect.wantOk "Expected valid JSON."
-
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound unregister.StatusCode
-            Expect.equalJson actual expected
+            Expect.equalJson expected actual
         }
