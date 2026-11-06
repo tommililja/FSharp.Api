@@ -31,9 +31,9 @@ module App =
     let app = builder.Build()
 
     !app
+        .UseExceptionHandler()
         .UseRouting()
-        .Use(Default.exceptionMiddleware)
         .UseOxpecker(Endpoints.list)
-        .Run(Default.notFoundHandler)
+        .Run(EndpointHandlers.problem 404 "Resource not found.")
 
     app.Run()
