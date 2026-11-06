@@ -8,9 +8,6 @@ open Oxpecker.ViewEngine
 
 module Docs =
 
-    [<Literal>]
-    let JsonFilename = "openapi.json"
-
     let document =
         OpenApiDocument (
             Info = OpenApiInfo(Title = "F# REST API", Version = "v1", Description = "An F# REST API."),
@@ -49,7 +46,7 @@ module Docs =
             }
             body() {
                 RegularNode("elements-api")
-                    .attr("apiDescriptionUrl", JsonFilename)
+                    .attr("apiDescriptionUrl", "openapi.json")
                     .attr("router", "hash")
             }
         }

@@ -5,12 +5,6 @@ open Oxpecker
 module Endpoints =
     open EndpointHandlers
 
-    let private docs =
-        [
-            GET [ route "/" (htmlView Docs.html) ]
-            GET [ route Docs.JsonFilename (jsonBytes Docs.json) ]
-        ]
-
     let list =
         [
             subRoute "/users" [
@@ -21,5 +15,9 @@ module Endpoints =
                 POST [ routeb "/" Handlers.RegisterUser.parser Handlers.RegisterUser.handle ]
                 DELETE [ routefr "/{%O:guid}" (UserId.fromGuid >> Handlers.UnregisterUser.handle) ]
             ]
+
+            GET [
+                route "/" (htmlView Docs.html)
+                route "/openapi.json" (jsonBytes Docs.json)
+            ]
         ]
-        |> List.append docs
