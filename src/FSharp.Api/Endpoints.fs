@@ -4,6 +4,7 @@ open Oxpecker
 
 module Endpoints =
     open EndpointHandlers
+    open Routing
 
     let list =
         [

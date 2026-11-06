@@ -99,7 +99,9 @@ module Database =
                     FROM [User]
                     WHERE [Id] = @id
                 "
-                [ "id", sqlGuid (UserId.asGuid userId) ]
+                [
+                    "id", sqlGuid (UserId.asGuid userId)
+                ]
                 reader
 
         let tryGetByEmail email =
@@ -109,7 +111,9 @@ module Database =
                     FROM [User]
                     WHERE [Email] = @email
                 "
-                [ "email", sqlString (Email.asString email) ]
+                [
+                    "email", sqlString (Email.asString email)
+                ]
                 reader
 
         let tryDelete userId =

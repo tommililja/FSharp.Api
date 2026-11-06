@@ -16,14 +16,13 @@ module EndpointHandlers =
 
     let validationProblem detail errors : EndpointHandler =
         fun ctx ->
-            let errors : IDictionary<string, string[]> =
+            let errors =
                 errors
                 |> List.map (_.Path >> JsonPath.asString)
                 |> List.distinct
                 |> List.map (fun path -> path, [| "The value is missing or invalid." |])
-                |> dict
 
-            Results.ValidationProblem(errors,
+            Results.ValidationProblem(dict errors,
                 detail = detail,
                 instance = ctx.Request.Path.Value
             ).ExecuteAsync(ctx)
@@ -93,7 +92,7 @@ module EndpointHandlers =
 [<NoComparison>]
 type ApiResponse =
     | Content of Json
-    | ContentStream of IAsyncEnumerable<Json>
+    | ContentStream of stream:IAsyncEnumerable<Json>
     | CreatedAt of location:string
     | NoContent
 
@@ -127,7 +126,6 @@ module ApiError =
         | Conflict detail -> problem 409 detail
         | InternalServerError -> problem 500 "An unexpected error occurred."
 
-[<AutoOpen>]
 module Routing =
 
     let private resolve eff : EndpointHandler =
