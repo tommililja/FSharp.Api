@@ -42,7 +42,9 @@ module EndpointHandlers =
                 ctx.Response.ContentType <- JsonContentType
                 use writer = new Utf8JsonWriter(ctx.Response.BodyWriter)
                 Json.writeTo writer json
-                do! writer.FlushAsync()
+                writer.Flush()
+                let! _ = ctx.Response.BodyWriter.FlushAsync(ctx.RequestAborted)
+                ()
             }
 
     let jsonBytes (bytes:byte[]) : EndpointHandler =
