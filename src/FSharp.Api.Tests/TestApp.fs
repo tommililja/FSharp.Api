@@ -4,10 +4,13 @@ open System
 open System.IO
 open System.Net.Http
 open FSharp.Api
+open Meziantou.Extensions.Logging.Xunit.v3
+open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Logging
 open Testcontainers.MsSql
 open Xunit
 
@@ -52,24 +55,25 @@ module TestApp =
                 {
                     new WebApplicationFactory<AppEnv>() with
                         member _.ConfigureWebHost(builder) =
-                            !builder.ConfigureTestServices(fun services ->
-                                !services
-                                    .PostConfigure<ProblemDetailsOptions>(fun options ->
-                                        let existing = options.CustomizeProblemDetails
-                                        options.CustomizeProblemDetails <-
-                                            Action<ProblemDetailsContext>(fun context ->
+                            !builder
+                                .ConfigureLogging(fun x -> !x.AddProvider(new XUnitLoggerProvider(output)))
+                                .ConfigureTestServices(fun services ->
+                                    !services
+                                        .PostConfigure<ProblemDetailsOptions>(fun options ->
+                                            let existing = options.CustomizeProblemDetails
+                                            options.CustomizeProblemDetails <- (fun context ->
                                                 if not (isNull existing) then existing.Invoke(context)
                                                 context.ProblemDetails.Extensions["traceId"] <- box "test-trace-id"
                                             )
-                                    )
-                                    .AddScoped<IAppEnv>(fun x ->
-                                        let cancellationToken =
-                                            x.GetRequiredService<IHttpContextAccessor>()
-                                                .HttpContext.RequestAborted
+                                        )
+                                        .AddScoped<IAppEnv>(fun x ->
+                                            let cancellationToken =
+                                                x.GetRequiredService<IHttpContextAccessor>()
+                                                    .HttpContext.RequestAborted
 
-                                        new TestEnv(guidGen, cancellationToken, connectionString, output)
-                                    )
-                            )
+                                            new TestEnv(guidGen, cancellationToken, connectionString, output)
+                                        )
+                                )
                 }
 
             let client = factory.CreateDefaultClient(new OpenApiValidationHandler(Docs.document))
