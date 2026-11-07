@@ -1,5 +1,6 @@
 ﻿namespace FSharp.Api
 
+open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
@@ -20,12 +21,13 @@ module App =
         .AddHttpContextAccessor()
         .AddProblemDetails()
         .AddScoped<IAppEnv>(fun x ->
-            let factory = x.GetRequiredService<ILoggerFactory>()
+            let newGuid = Guid.NewGuid
+            let loggerFactory = x.GetRequiredService<ILoggerFactory>()
             let cancellationToken =
                 x.GetRequiredService<IHttpContextAccessor>()
                     .HttpContext.RequestAborted
 
-            AppEnv.create factory cancellationToken connectionString
+            AppEnv.create newGuid loggerFactory cancellationToken connectionString
         )
 
     let app = builder.Build()

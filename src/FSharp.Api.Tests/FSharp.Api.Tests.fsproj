@@ -14,7 +14,6 @@
         <Compile Include="OpenApiValidationHandler.fs" />
         <Compile Include="GuidGen.fs" />
         <Compile Include="TestData.fs" />
-        <Compile Include="TestEnv.fs" />
         <Compile Include="TestApp.fs" />
         <Compile Include="Tests\UserTests.fs" />
     </ItemGroup>

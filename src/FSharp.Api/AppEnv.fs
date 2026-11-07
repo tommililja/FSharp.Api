@@ -6,7 +6,7 @@ open Microsoft.Extensions.Logging
 
 module AppEnv =
 
-    let create (factory:ILoggerFactory) cancellationToken connectionString =
+    let create newGuid (loggerFactory:ILoggerFactory) cancellationToken connectionString =
         let sqlConnection = new SqlConnection(connectionString)
         let opened =
             lazy (
@@ -19,8 +19,8 @@ module AppEnv =
         {
             new IAppEnv with
                 member _.GetSqlConnection() = opened.Force()
-                member _.CreateGuid() = Guid.NewGuid()
-                member _.GetLogger(name) = factory.CreateLogger(name)
+                member _.CreateGuid() = newGuid ()
+                member _.GetLogger(name) = loggerFactory.CreateLogger(name)
                 member _.GetCancellationToken() = cancellationToken
 
             interface IDisposable with

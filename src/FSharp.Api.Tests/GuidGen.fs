@@ -35,3 +35,5 @@ module GuidGen =
         list guids, Map map
 
     let generate (GuidGen fn) = fn ()
+
+    let asFn (GuidGen x) = x
