@@ -12,7 +12,7 @@ module Docs =
             Info = OpenApiInfo(Title = "F# REST API", Version = "v1", Description = "An F# REST API."),
             Servers = ResizeArray [ OpenApiServer(Url = "/") ],
             Paths = OpenApi.paths UserPaths.paths,
-            Tags = HashSet [ OpenApiTag(Name = "User") ]
+            Tags = HashSet [ OpenApiTag(Name = "Users") ]
         )
 
     let json =
