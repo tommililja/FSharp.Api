@@ -80,7 +80,7 @@ module Database =
         let getList () =
             list
                 "
-                    SELECT *
+                    SELECT Id, Email, BirthDate
                     FROM [User]
                 "
                 []
@@ -89,7 +89,7 @@ module Database =
         let getStream () =
             stream
                 "
-                    SELECT *
+                    SELECT Id, Email, BirthDate
                     FROM [User]
                 "
                 []
@@ -98,7 +98,7 @@ module Database =
         let tryGet userId =
             trySingle
                 "
-                    SELECT *
+                    SELECT Id, Email, BirthDate
                     FROM [User]
                     WHERE [Id] = @id
                 "
@@ -110,7 +110,7 @@ module Database =
         let tryGetByEmail email =
             trySingle
                 "
-                    SELECT *
+                    SELECT Id, Email, BirthDate
                     FROM [User]
                     WHERE [Email] = @email
                 "
