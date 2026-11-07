@@ -6,28 +6,30 @@ open FSharp.Control
 open Meziantou.Extensions.Logging.Xunit.v3
 open Microsoft.Data.SqlClient
 
-type TestEnv(guidGen, cancellationToken, connectionString, output) =
+module TestEnv =
 
-    let sqlConnection = new SqlConnection(connectionString)
+    let create guidGen cancellationToken connectionString output =
+        let sqlConnection = new SqlConnection(connectionString)
+        let opened =
+            lazy (
+                task {
+                    do! sqlConnection.OpenAsync(cancellationToken)
+                    return sqlConnection
+                }
+            )
 
-    let opened =
-        lazy (
-            task {
-                do! sqlConnection.OpenAsync(cancellationToken)
-                return sqlConnection
-            }
-        )
+        {
+            new IAppEnv with
+                member _.GetSqlConnection() = opened.Force()
+                member _.CreateGuid() = GuidGen.generate guidGen
+                member _.GetLogger _ = XUnitLogger.CreateLogger(output)
+                member _.GetCancellationToken() = cancellationToken
 
-    interface IAppEnv with
-        member _.GetSqlConnection() = opened.Force()
-        member _.CreateGuid() = GuidGen.generate guidGen
-        member _.GetLogger _ = XUnitLogger.CreateLogger(output)
-        member _.GetCancellationToken() = cancellationToken
+            interface IDisposable with
+                member _.Dispose() =
+                    sqlConnection.Dispose()
 
-    interface IDisposable with
-        member _.Dispose() =
-            sqlConnection.Dispose()
-
-    interface IAsyncDisposable with
-        member _.DisposeAsync() =
-            sqlConnection.DisposeAsync()
+            interface IAsyncDisposable with
+                member _.DisposeAsync() =
+                    sqlConnection.DisposeAsync()
+        }

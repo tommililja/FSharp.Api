@@ -8,6 +8,9 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Oxpecker
 
+type App =
+    class end
+
 module App =
 
     let builder = WebApplication.CreateBuilder()
@@ -25,7 +28,7 @@ module App =
                 x.GetRequiredService<IHttpContextAccessor>()
                     .HttpContext.RequestAborted
 
-            new AppEnv(factory, cancellationToken, connectionString)
+            AppEnv.create factory cancellationToken connectionString
         )
 
     let app = builder.Build()

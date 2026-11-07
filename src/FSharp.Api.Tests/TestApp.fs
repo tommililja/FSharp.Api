@@ -14,7 +14,7 @@ open Microsoft.Extensions.Logging
 open Testcontainers.MsSql
 open Xunit
 
-type TestApp(factory:WebApplicationFactory<AppEnv>, connectionString:string, client:HttpClient) =
+type TestApp(factory:WebApplicationFactory<App>, connectionString:string, client:HttpClient) =
     interface IDisposable with
         member _.Dispose() =
             client.Dispose()
@@ -53,7 +53,7 @@ module TestApp =
 
             let factory =
                 {
-                    new WebApplicationFactory<AppEnv>() with
+                    new WebApplicationFactory<App>() with
                         member _.ConfigureWebHost(builder) =
                             !builder
                                 .ConfigureLogging(fun x -> !x.AddProvider(new XUnitLoggerProvider(output)))
@@ -71,7 +71,7 @@ module TestApp =
                                                 x.GetRequiredService<IHttpContextAccessor>()
                                                     .HttpContext.RequestAborted
 
-                                            new TestEnv(guidGen, cancellationToken, connectionString, output)
+                                            TestEnv.create guidGen cancellationToken connectionString output
                                         )
                                 )
                 }
