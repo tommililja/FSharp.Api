@@ -50,13 +50,15 @@ module TestApp =
             do! TestData.execute connectionString resetSql
 
             let output = TestContext.Current.TestOutputHelper
+            let provider = new XUnitLoggerProvider(output)
+            let logger = XUnitLogger.CreateLogger(output)
 
             let factory =
                 {
                     new WebApplicationFactory<App>() with
                         member _.ConfigureWebHost(builder) =
                             !builder
-                                .ConfigureLogging(fun x -> !x.AddProvider(new XUnitLoggerProvider(output)))
+                                .ConfigureLogging(fun x -> !x.AddProvider(provider))
                                 .ConfigureTestServices(fun services ->
                                     !services
                                         .PostConfigure<ProblemDetailsOptions>(fun options ->
@@ -71,7 +73,7 @@ module TestApp =
                                                 x.GetRequiredService<IHttpContextAccessor>()
                                                     .HttpContext.RequestAborted
 
-                                            TestEnv.create guidGen cancellationToken connectionString output
+                                            TestEnv.create guidGen cancellationToken connectionString logger
                                         )
                                 )
                 }

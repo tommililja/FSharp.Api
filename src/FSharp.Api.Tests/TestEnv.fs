@@ -3,12 +3,11 @@ namespace FSharp.Api.Tests
 open System
 open FSharp.Api
 open FSharp.Control
-open Meziantou.Extensions.Logging.Xunit.v3
 open Microsoft.Data.SqlClient
 
 module TestEnv =
 
-    let create guidGen cancellationToken connectionString output =
+    let create guidGen cancellationToken connectionString logger =
         let sqlConnection = new SqlConnection(connectionString)
         let opened =
             lazy (
@@ -22,7 +21,7 @@ module TestEnv =
             new IAppEnv with
                 member _.GetSqlConnection() = opened.Force()
                 member _.CreateGuid() = GuidGen.generate guidGen
-                member _.GetLogger _ = XUnitLogger.CreateLogger(output)
+                member _.GetLogger _ = logger
                 member _.GetCancellationToken() = cancellationToken
 
             interface IDisposable with
