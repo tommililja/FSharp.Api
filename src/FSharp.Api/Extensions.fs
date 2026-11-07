@@ -1,6 +1,7 @@
 namespace FSharp.Api
 
 open System
+open NodaTime.Text
 open Orsak
 
 [<AutoOpen>]
@@ -23,6 +24,16 @@ module Guid =
 
     let asString (x:Guid) =
         x.ToString("N")
+
+module LocalDate =
+
+    let parse str =
+        match LocalDatePattern.Iso.Parse(str) with
+        | result when result.Success -> Ok result.Value
+        | result -> Error $"Invalid LocalDate: %s{result.Exception.Message}."
+
+    let as8601String x =
+        LocalDatePattern.Iso.Format(x)
 
 module SqlConnection =
 

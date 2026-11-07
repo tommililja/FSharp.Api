@@ -4,6 +4,7 @@ open FSharp.Control
 open Microsoft.Extensions.Logging
 open Farse
 open Farse.Operators
+open NodaTime
 open Orsak
 
 module UserResponse =
@@ -12,6 +13,7 @@ module UserResponse =
         JObj [
             "id", JStr (UserId.asString user.Id)
             "email", JStr (Email.asString user.Email)
+            "birthDate", JStr (LocalDate.as8601String user.BirthDate)
         ]
 
 module RegisterUserHandler =
@@ -19,12 +21,17 @@ module RegisterUserHandler =
 
     type Request = {
         Email: Email
+        BirthDate: LocalDate
     }
 
     let parse =
         parser {
             let! email = "email" &= refine string Email.parse
-            return { Email = email }
+            and! birthDate = "birthDate" &= refine string LocalDate.parse
+            return {
+                Email = email
+                BirthDate = birthDate
+            }
         }
 
     let handle request =
@@ -41,6 +48,7 @@ module RegisterUserHandler =
             let user = {
                 Id = UserId.fromGuid userId
                 Email = request.Email
+                BirthDate = request.BirthDate
             }
 
             do! Database.Users.add user

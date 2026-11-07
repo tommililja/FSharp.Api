@@ -21,9 +21,17 @@ module UserPaths =
             Examples = OpenApi.examples [ "alice@domain.com" ]
         )
 
+    let private dateSchema =
+        OpenApiSchema(
+            Type = JsonSchemaType.String,
+            Format = "yyyy-MM-dd",
+            Description = "Date",
+            Examples = OpenApi.examples [ "2026-01-01" ]
+        )
+
     let private userIdParam =
         OpenApiParameter(
-            Name = "userId",
+            Name = "id",
             In = ParameterLocation.Path,
             Required = true,
             Schema = guidSchema
@@ -32,10 +40,11 @@ module UserPaths =
     let private userSchema =
         OpenApiSchema(
             Type = JsonSchemaType.Object,
-            Required = HashSet [ "id"; "email" ],
+            Required = HashSet [ "id"; "email"; "birthDate" ],
             Properties = dict [
                 "id", guidSchema
                 "email", emailSchema
+                "birthDate", dateSchema
             ]
         )
 
@@ -47,9 +56,10 @@ module UserPaths =
                 OpenApi.jsonRequest
                     (OpenApiSchema (
                         Type = JsonSchemaType.Object,
-                        Required = HashSet([ "email" ]),
+                        Required = HashSet([ "email"; "birthDate" ]),
                         Properties = dict [
                             "email", emailSchema
+                            "birthDate", dateSchema
                         ]
                     )),
             Responses =
@@ -71,7 +81,7 @@ module UserPaths =
     let getUser =
         OpenApiOperation (
             Summary = "Get user",
-            Description = "Gets a user by userId.",
+            Description = "Gets a user by id.",
             Parameters =
                 OpenApi.parameters [
                     userIdParam
@@ -100,7 +110,7 @@ module UserPaths =
     let unregisterUser =
         OpenApiOperation (
             Summary = "Unregister user",
-            Description = "Unregisters a user by userId.",
+            Description = "Unregisters a user by id.",
             Parameters =
                 OpenApi.parameters [
                     userIdParam

@@ -4,6 +4,7 @@ open System.Data
 open System.Data.Common
 open FSharp.Control
 open Donald
+open NodaTime
 open Orsak
 
 module Database =
@@ -61,23 +62,25 @@ module Database =
             {
                 Id = x.ReadGuid "Id" |> UserId.fromGuid
                 Email = x.ReadString "Email" |> Email
+                BirthDate = x.ReadDateTime "BirthDate" |> LocalDate.FromDateTime
             }
 
         let add user =
             exec
                 "
-                    INSERT INTO [User] (Id, Email)
-                    VALUES (@id, @email)
+                    INSERT INTO [User] (Id, Email, BirthDate)
+                    VALUES (@id, @email, @birthDate)
                 "
                 [
                     "id", sqlGuid (UserId.asGuid user.Id)
                     "email", sqlString (Email.asString user.Email)
+                    "birthDate", sqlDateTime (user.BirthDate.ToDateTimeUnspecified())
                 ]
 
         let getList () =
             list
                 "
-                    SELECT Id, Email
+                    SELECT *
                     FROM [User]
                 "
                 []
@@ -86,7 +89,7 @@ module Database =
         let getStream () =
             stream
                 "
-                    SELECT Id, Email
+                    SELECT *
                     FROM [User]
                 "
                 []
@@ -95,7 +98,7 @@ module Database =
         let tryGet userId =
             trySingle
                 "
-                    SELECT Id, Email
+                    SELECT *
                     FROM [User]
                     WHERE [Id] = @id
                 "
@@ -107,7 +110,7 @@ module Database =
         let tryGetByEmail email =
             trySingle
                 "
-                    SELECT Id, Email
+                    SELECT *
                     FROM [User]
                     WHERE [Email] = @email
                 "

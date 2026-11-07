@@ -2,6 +2,7 @@ namespace FSharp.Api
 
 open System
 open System.Text.RegularExpressions
+open NodaTime
 
 type AggregateId = AggregateId of Guid
 
@@ -41,4 +42,5 @@ module Email =
 type User = {
     Id: UserId
     Email: Email
+    BirthDate: LocalDate
 }
