@@ -18,7 +18,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             let request =
@@ -60,7 +60,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             let request =
@@ -98,7 +98,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             let request = new StringContent("""{ "email: }""")
@@ -129,7 +129,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             do! TestData.insertUser user app.ConnectionString
@@ -167,7 +167,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             do! TestData.insertUsers 100 app.ConnectionString
@@ -191,7 +191,7 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                GuidGen.always user.Id
+                GuidGen.single user.Id
                 |> TestApp.create
 
             let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString user.Id}")
@@ -220,7 +220,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             do! TestData.insertUser user app.ConnectionString
@@ -239,7 +239,7 @@ module UserTests =
 
             use! app =
                 user.Id
-                |> GuidGen.always
+                |> GuidGen.single
                 |> TestApp.create
 
             let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString user.Id}")
