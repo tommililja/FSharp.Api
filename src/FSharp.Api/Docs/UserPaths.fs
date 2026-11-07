@@ -1,6 +1,7 @@
 namespace FSharp.Api
 
 open System.Collections.Generic
+open System.Net.Http
 open Microsoft.OpenApi
 
 module UserPaths =
@@ -122,3 +123,15 @@ module UserPaths =
                 ],
             Tags = OpenApi.tagRefs [ "Users" ]
         )
+
+    let paths =
+        [
+            "/users", OpenApi.pathItem [
+                HttpMethod.Get, getUsers
+                HttpMethod.Post, registerUser
+            ]
+            "/users/{id}", OpenApi.pathItem [
+                HttpMethod.Get, getUser
+                HttpMethod.Delete, unregisterUser
+            ]
+        ]

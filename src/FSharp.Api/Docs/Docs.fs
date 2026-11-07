@@ -1,7 +1,6 @@
 namespace FSharp.Api
 
 open System.Collections.Generic
-open System.Net.Http
 open System.Text
 open Microsoft.OpenApi
 open Oxpecker.ViewEngine
@@ -12,17 +11,7 @@ module Docs =
         OpenApiDocument (
             Info = OpenApiInfo(Title = "F# REST API", Version = "v1", Description = "An F# REST API."),
             Servers = ResizeArray [ OpenApiServer(Url = "/") ],
-            Paths =
-                OpenApi.paths [
-                    "/users", OpenApi.pathItem [
-                        HttpMethod.Get, UserPaths.getUsers
-                        HttpMethod.Post, UserPaths.registerUser
-                    ]
-                    "/users/{userId}", OpenApi.pathItem [
-                        HttpMethod.Get, UserPaths.getUser
-                        HttpMethod.Delete, UserPaths.unregisterUser
-                    ]
-                ],
+            Paths = OpenApi.paths UserPaths.paths,
             Tags = HashSet [ OpenApiTag(Name = "User") ]
         )
 
