@@ -64,7 +64,10 @@ module UserTests =
                 |> TestApp.create
 
             let request =
-                JObj [ "email", JStr user.Email ]
+                JObj [
+                    "email", JStr user.Email
+                    "birthDate", JStr user.BirthDate
+                ]
                 |> Json.asStringContent
 
             let! register = app.Client.PostAsync("/users", request)

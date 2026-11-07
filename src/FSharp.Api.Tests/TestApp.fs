@@ -50,7 +50,7 @@ module TestApp =
             do! TestData.execute connectionString resetSql
 
             let output = TestContext.Current.TestOutputHelper
-            let provider = new XUnitLoggerProvider(output)
+            use provider = new XUnitLoggerProvider(output)
             let logger = XUnitLogger.CreateLogger(output)
 
             let factory =
