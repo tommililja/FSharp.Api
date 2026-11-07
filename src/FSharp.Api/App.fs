@@ -8,9 +8,6 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Oxpecker
 
-type App =
-    class end
-
 module App =
 
     let builder = WebApplication.CreateBuilder()
