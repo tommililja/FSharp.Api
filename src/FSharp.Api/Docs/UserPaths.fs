@@ -22,11 +22,11 @@ module UserPaths =
             Examples = OpenApi.examples [ "alice@domain.com" ]
         )
 
-    let private dateSchema =
+    let private dateSchema description =
         OpenApiSchema(
             Type = JsonSchemaType.String,
-            Format = "yyyy-MM-dd",
-            Description = "Date",
+            Format = "date",
+            Description = description,
             Examples = OpenApi.examples [ "2026-01-01" ]
         )
 
@@ -45,7 +45,7 @@ module UserPaths =
             Properties = dict [
                 "id", guidSchema
                 "email", emailSchema
-                "birthDate", dateSchema
+                "birthDate", dateSchema "Birth date (ISO 8601, yyyy-MM-dd)"
             ]
         )
 
@@ -60,7 +60,7 @@ module UserPaths =
                         Required = HashSet([ "email"; "birthDate" ]),
                         Properties = dict [
                             "email", emailSchema
-                            "birthDate", dateSchema
+                            "birthDate", dateSchema "Birth date (ISO 8601, yyyy-MM-dd)"
                         ]
                     )),
             Responses =
