@@ -57,7 +57,7 @@ module EndpointHandlers =
                 ()
             }
 
-    let stream (sequence:IAsyncEnumerable<Json>) : EndpointHandler =
+    let stream (items:IAsyncEnumerable<Json>) : EndpointHandler =
         fun ctx ->
             task {
                 ctx.Response.StatusCode <- 200
@@ -66,7 +66,18 @@ module EndpointHandlers =
                 let body = ctx.Response.BodyWriter
                 use writer = new Utf8JsonWriter(body)
 
+                let mutable started = false
                 let mutable flushed = 0L
+
+                // Sends the headers and opens the array. Called once the first row has been read,
+                // so a failure before that leaves the response untouched for the exception handler.
+                let start () =
+                    task {
+                        do! ctx.Response.StartAsync(ctx.RequestAborted)
+                        writer.WriteStartArray()
+                        started <- true
+                    }
+
                 let flush () =
                     task {
                         writer.Flush()
@@ -74,17 +85,22 @@ module EndpointHandlers =
                         flushed <- writer.BytesCommitted
                     }
 
-                writer.WriteStartArray()
-
-                do! sequence
+                do!
+                    items
                     |> TaskSeq.iterAsync (fun json ->
                         task {
+                            if not started then
+                                do! start ()
+
                             Json.writeTo writer json
 
                             if (writer.BytesCommitted + int64 writer.BytesPending) - flushed > 16_384L then
                                 do! flush ()
                         }
                     )
+
+                if not started then
+                    do! start ()
 
                 writer.WriteEndArray()
 
