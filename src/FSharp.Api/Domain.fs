@@ -35,7 +35,7 @@ module Email =
     let parse (str:string) =
         if emailRegex.IsMatch(str)
         then Ok (Email str)
-        else Error "Invalid email address."
+        else Error $"Expected '%s{string emailRegex}' pattern."
 
     let asString (Email x) = x
 

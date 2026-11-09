@@ -79,8 +79,8 @@ module UserTests =
                 JObj [
                     "errors",
                         JObj [
-                            "$.email", JStr.array id [ "The value is missing or invalid." ]
-                            "$.birthDate", JStr.array id [ "The value is missing or invalid." ]
+                            "$.email", JStr.array id [ "Expected '^[^@\s]+@[^@\s]+\.[^@\s]+$' pattern." ]
+                            "$.birthDate", JStr.array id [ "Expected 'yyyy-MM-dd' format." ]
                         ]
                     "detail", JStr "Invalid request body."
                     "instance", JStr "/users"
@@ -194,7 +194,8 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                GuidGen.single user.Id
+                user.Id
+                |> GuidGen.single
                 |> TestApp.create
 
             let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString user.Id}")

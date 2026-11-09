@@ -30,7 +30,7 @@ module LocalDate =
     let parse str =
         match LocalDatePattern.Iso.Parse(str) with
         | result when result.Success -> Ok result.Value
-        | result -> Error $"Invalid LocalDate: %s{result.Exception.Message}."
+        | _ -> Error "Expected 'yyyy-MM-dd' format."
 
     let as8601String x =
         LocalDatePattern.Iso.Format(x)

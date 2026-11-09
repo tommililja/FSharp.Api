@@ -18,9 +18,10 @@ module EndpointHandlers =
         fun ctx ->
             let errors =
                 errors
-                |> List.map (_.Path >> JsonPath.asString)
-                |> List.distinct
-                |> List.map (fun path -> path, [| "The value is missing or invalid." |])
+                |> List.map (fun e ->
+                    e.Path
+                    |> JsonPath.asString, [| e.Details |]
+                )
 
             Results.ValidationProblem(dict errors,
                 detail = detail,
