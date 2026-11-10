@@ -3,7 +3,6 @@
 #nowarn 3391
 
 open System.Net
-open System.Net.Http
 open FSharp.Api
 open Xunit
 open Expecto.Flip
@@ -26,12 +25,11 @@ module UserTests =
                     "email", JStr user.Email
                     "birthDate", JStr user.BirthDate
                 ]
-                |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/users", request)
+            let! register = app.RegisterUser(request)
             Expect.equal "Expected equal status codes" HttpStatusCode.Created register.StatusCode
 
-            let! getUser = app.Client.GetAsync(register.Headers.Location)
+            let! getUser = app.GetUser(user.Id)
             Expect.equal "Expected equal status codes" HttpStatusCode.OK getUser.StatusCode
 
             let! json = HttpResponseMessage.asJson getUser
@@ -68,9 +66,8 @@ module UserTests =
                     "email", JStr user.Email
                     "birthDate", JStr user.BirthDate
                 ]
-                |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/users", request)
+            let! register = app.RegisterUser(request)
             let! json = HttpResponseMessage.asJson register
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -104,9 +101,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            let request = new StringContent("""{ "email: }""")
-
-            let! register = app.Client.PostAsync("/users", request)
+            let! register = app.RegisterUser("""{ "email: """)
             let! json = HttpResponseMessage.asJson register
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -142,9 +137,8 @@ module UserTests =
                     "email", JStr user.Email
                     "birthDate", JStr user.BirthDate
                 ]
-                |> Json.asStringContent
 
-            let! register = app.Client.PostAsync("/users", request)
+            let! register = app.RegisterUser(request)
             let! json = HttpResponseMessage.asJson register
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -175,7 +169,7 @@ module UserTests =
 
             do! TestData.insertUsers 100 app.ConnectionString
 
-            let! getUsers = app.Client.GetAsync("/users")
+            let! getUsers = app.GetUsers()
             Expect.equal "Expected equal status codes." HttpStatusCode.OK getUsers.StatusCode
 
             let! json = HttpResponseMessage.asJson getUsers
@@ -198,7 +192,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString user.Id}")
+            let! getUser = app.GetUser(user.Id)
             let! json = HttpResponseMessage.asJson getUser
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -229,10 +223,10 @@ module UserTests =
 
             do! TestData.insertUser user app.ConnectionString
 
-            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString user.Id}")
+            let! unregister = app.UnregisterUser(user.Id)
             Expect.equal "Expected equal status codes." HttpStatusCode.NoContent unregister.StatusCode
 
-            let! getUser = app.Client.GetAsync($"/users/%s{Guid.asString user.Id}")
+            let! getUser = app.GetUser(user.Id)
             Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
         }
 
@@ -246,7 +240,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            let! unregister = app.Client.DeleteAsync($"/users/%s{Guid.asString user.Id}")
+            let! unregister = app.UnregisterUser(user.Id)
             let! json = HttpResponseMessage.asJson unregister
 
             let actual = json |> Expect.wantOk "Expected valid JSON."

@@ -3,6 +3,7 @@ namespace FSharp.Api.Tests
 open System
 open System.IO
 open System.Net.Http
+open System.Text
 open FSharp.Api
 open Meziantou.Extensions.Logging.Xunit.v3
 open Microsoft.AspNetCore.Builder
@@ -25,13 +26,28 @@ type private HttpLoggingFilter() =
             )
 
 type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient) =
+    member _.Client = client
+    member _.ConnectionString = connectionString
+
+    member _.GetUser(userId) =
+        client.GetAsync($"/users/%s{Guid.asString userId}")
+
+    member _.GetUsers() =
+        client.GetAsync("/users")
+
+    member _.RegisterUser(json) =
+        client.PostAsync("/users", Json.asStringContent json)
+
+    member _.RegisterUser(body) =
+        client.PostAsync("/users", new StringContent(body, Encoding.UTF8, "application/json"))
+
+    member _.UnregisterUser(userId) =
+        client.DeleteAsync($"/users/%s{Guid.asString userId}")
+
     interface IDisposable with
         member _.Dispose() =
             client.Dispose()
             factory.Dispose()
-
-    member _.Client = client
-    member _.ConnectionString = connectionString
 
 module TestApp =
 
