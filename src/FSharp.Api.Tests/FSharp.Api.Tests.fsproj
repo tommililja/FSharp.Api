@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
         <Content Include="Scripts\CreateTables.sql">
@@ -22,11 +22,12 @@
       <PackageReference Include="Farse" Version="1.0.0" />
       <PackageReference Include="JsonSchema.Net" Version="9.6.0" />
       <PackageReference Include="Meziantou.Extensions.Logging.Xunit.v3" Version="3.0.11" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.14" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+      <PackageReference Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
       <PackageReference Include="Testcontainers.MsSql" Version="4.16.0" />
-      <PackageReference Include="xunit.v3" Version="4.0.2" />
-      <PackageReference Update="FSharp.Core" Version="10.1.403" />
+      <PackageReference Include="xunit.v3" Version="4.0.3" />
+      <PackageReference Update="FSharp.Core" Version="11.0.101" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\FSharp.Api\FSharp.Api.fsproj" />
