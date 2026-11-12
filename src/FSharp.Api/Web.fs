@@ -136,8 +136,11 @@ module ApiResponse =
 module ApiError =
     open EndpointHandlers
 
+    let notFound : EndpointHandler =
+        problem 404 "Resource not found."
+
     let handle = function
-        | NotFound -> problem 404 "Resource not found."
+        | NotFound -> notFound
         | BadRequest (detail, errors) ->
             match errors with
             | [] -> problem 400 detail

@@ -36,6 +36,6 @@ module App =
         .UseExceptionHandler()
         .UseRouting()
         .UseOxpecker(Endpoints.list)
-        .Run(EndpointHandlers.problem 404 "Resource not found.")
+        .Run(ApiError.notFound)
 
     app.Run()
