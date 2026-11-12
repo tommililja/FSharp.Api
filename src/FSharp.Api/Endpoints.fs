@@ -10,10 +10,10 @@ module Endpoints =
         [
             subRoute "/users" [
                 GET [
-                    router "/" GetUsersHandler.handle
+                    router "" GetUsersHandler.handle
                     routefr "/{%O:guid}" (UserId.fromGuid >> GetUserHandler.handle)
                 ]
-                POST [ routeb "/" RegisterUserHandler.parse RegisterUserHandler.handle ]
+                POST [ routeb "" RegisterUserHandler.parse RegisterUserHandler.handle ]
                 DELETE [ routefr "/{%O:guid}" (UserId.fromGuid >> UnregisterUserHandler.handle) ]
             ]
 
