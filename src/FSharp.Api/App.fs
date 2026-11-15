@@ -16,6 +16,7 @@ module App =
     let appSettings = AppSettings.load builder.Configuration
 
     !builder.Services
+        .AddHttpClient()
         .AddHttpContextAccessor()
         .AddProblemDetails()
         .AddScoped<IAppEnv>(fun x ->
