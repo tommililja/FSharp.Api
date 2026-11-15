@@ -69,7 +69,7 @@ module HttpResponseMessage =
 
     let parse parser token (message:HttpResponseMessage) =
         task {
-            let! stream = message.Content.ReadAsStreamAsync()
+            use! stream = message.Content.ReadAsStreamAsync(token)
             let! result = parser |> Parser.parseAsync stream token
             return result
         }
