@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Net.Http
 open System.Text
+open System.Threading
 open FSharp.Api
 open Meziantou.Extensions.Logging.Xunit.v3
 open Microsoft.AspNetCore.Builder
@@ -14,6 +15,7 @@ open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
+open RichardSzalay.MockHttp
 open Testcontainers.MsSql
 open Xunit
 
@@ -25,9 +27,10 @@ type private HttpLoggingFilter() =
                 next.Invoke(app)
             )
 
-type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient) =
+type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient, httpHandlers:MockHttpMessageHandler) =
     member _.Client = client
     member _.ConnectionString = connectionString
+    member _.HttpHandlers = httpHandlers
 
     member _.GetUser(userId) =
         client.GetAsync($"/users/%s{Guid.asString userId}")
@@ -46,8 +49,10 @@ type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, cl
 
     interface IDisposable with
         member _.Dispose() =
-            client.Dispose()
-            factory.Dispose()
+            try httpHandlers.VerifyNoOutstandingExpectation()
+            finally
+                client.Dispose()
+                factory.Dispose()
 
 module TestApp =
 
@@ -86,46 +91,73 @@ module TestApp =
                     )
                 )
 
-            let webAppFactory =
+            let configureLogging (builder:ILoggingBuilder) =
+                !builder
+                    .AddProvider(provider)
+                    .AddFilter("Microsoft.AspNetCore", LogLevel.Information)
+
+            let httpHandlers = new MockHttpMessageHandler()
+
+            let configureTestServices (services:IServiceCollection) =
+                let addHttpLogging (options:HttpLoggingOptions) =
+                    options.LoggingFields <-
+                        HttpLoggingFields.RequestPropertiesAndHeaders
+                        ||| HttpLoggingFields.RequestBody
+                        ||| HttpLoggingFields.ResponseBody
+                        ||| HttpLoggingFields.ResponsePropertiesAndHeaders
+                    options.CombineLogs <- true
+
+                let configureProblemDetails (options:ProblemDetailsOptions) =
+                    let existing = options.CustomizeProblemDetails
+                    options.CustomizeProblemDetails <- (fun context ->
+                        if not (isNull existing) then existing.Invoke(context)
+                        context.ProblemDetails.Extensions["traceId"] <- box "test-trace-id"
+                    )
+
+                let configureEnv (x:IServiceProvider) =
+                    let newGuid = GuidGen.asFn guidGen
+                    let loggerFactory = x.GetRequiredService<ILoggerFactory>()
+                    let httpClientFactory = x.GetRequiredService<IHttpClientFactory>()
+                    let cancellationToken =
+                        x.GetRequiredService<IHttpContextAccessor>()
+                            .HttpContext.RequestAborted
+
+                    let appSettings = {
+                        ConnectionString = connectionString
+                        Integrations = {
+                            ExampleService = Uri("http://localhost")
+                        }
+                    }
+
+                    AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings
+
+                !httpHandlers.Fallback
+                    .Throw(InvalidOperationException("No matching mock handler found."))
+
+                !services
+                    .AddSingleton<MockHttpMessageHandler>(httpHandlers)
+                    .ConfigureHttpClientDefaults(fun http ->
+                        !http
+                            .ConfigurePrimaryHttpMessageHandler<MockHttpMessageHandler>()
+                            .SetHandlerLifetime(Timeout.InfiniteTimeSpan)
+                    )
+
+                !services
+                    .AddHttpLogging(addHttpLogging)
+                    .AddTransient<IStartupFilter, HttpLoggingFilter>()
+                    .PostConfigure<ProblemDetailsOptions>(configureProblemDetails)
+                    .AddScoped<IAppEnv>(configureEnv)
+
+            let factory =
                 {
                     new WebApplicationFactory<IAppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder
-                                .ConfigureLogging(fun x ->
-                                    !x.AddProvider(provider)
-                                    !x.AddFilter("Microsoft.AspNetCore", LogLevel.Information)
-                                )
-                                .ConfigureTestServices(fun services ->
-                                    !services
-                                        .AddHttpLogging(fun options ->
-                                            options.LoggingFields <-
-                                                HttpLoggingFields.RequestPropertiesAndHeaders
-                                                ||| HttpLoggingFields.RequestBody
-                                                ||| HttpLoggingFields.ResponseBody
-                                                ||| HttpLoggingFields.ResponsePropertiesAndHeaders
-                                            options.CombineLogs <- true
-                                        )
-                                        .AddTransient<IStartupFilter, HttpLoggingFilter>()
-                                        .PostConfigure<ProblemDetailsOptions>(fun options ->
-                                            let existing = options.CustomizeProblemDetails
-                                            options.CustomizeProblemDetails <- (fun context ->
-                                                if not (isNull existing) then existing.Invoke(context)
-                                                context.ProblemDetails.Extensions["traceId"] <- box "test-trace-id"
-                                            )
-                                        )
-                                        .AddScoped<IAppEnv>(fun x ->
-                                            let newGuid = GuidGen.asFn guidGen
-                                            let loggerFactory = x.GetRequiredService<ILoggerFactory>()
-                                            let cancellationToken =
-                                                x.GetRequiredService<IHttpContextAccessor>()
-                                                    .HttpContext.RequestAborted
-
-                                            AppEnv.create newGuid loggerFactory cancellationToken connectionString
-                                        )
-                                )
+                                .ConfigureLogging(configureLogging)
+                                .ConfigureTestServices(configureTestServices)
                 }
 
-            let client = webAppFactory.CreateDefaultClient(new OpenApiValidationHandler(Docs.document))
+            let client = factory.CreateDefaultClient(new OpenApiValidationHandler(Docs.document))
 
-            return new TestApp(webAppFactory, connectionString, client)
+            return new TestApp(factory, connectionString, client, httpHandlers)
         }

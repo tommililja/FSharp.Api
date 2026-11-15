@@ -3,7 +3,9 @@
 #nowarn 3391
 
 open System.Net
+open System.Net.Http
 open FSharp.Api
+open RichardSzalay.MockHttp
 open Xunit
 open Expecto.Flip
 open Farse
@@ -19,6 +21,11 @@ module UserTests =
                 user.Id
                 |> GuidGen.single
                 |> TestApp.create
+
+            !app.HttpHandlers
+                .Expect(HttpMethod.Get, "/test")
+                .WithExactQueryString($"?email=%s{user.Email}")
+                .Respond("application/json", """{ "data": "123" }""")
 
             let request =
                 JObj [
@@ -43,6 +50,7 @@ module UserTests =
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
 
+            Expect.equal "Expected equal Location headers" $"/users/%s{Guid.asString user.Id}" (string register.Headers.Location)
             Expect.equalJson expected actual
         }
 
@@ -87,7 +95,7 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
                 ]
 
-            Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.BadRequest register.StatusCode
             Expect.equalJson expected actual
         }
 
@@ -116,7 +124,7 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.1"
                 ]
 
-            Expect.equal "Expected equal status codes." HttpStatusCode.BadRequest register.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.BadRequest register.StatusCode
             Expect.equalJson expected actual
         }
 
@@ -153,7 +161,7 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.10"
                 ]
 
-            Expect.equal "Expected equal status codes." HttpStatusCode.Conflict register.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.Conflict register.StatusCode
             Expect.equalJson expected actual
         }
 
@@ -179,7 +187,7 @@ module UserTests =
                 | Ok (JArr list) -> list.Length
                 | _ -> failwith "Expected an array."
 
-            return Expect.equal "Expected equal values." 100 actual
+            return Expect.equal "Expected equal values" 100 actual
         }
 
     [<Fact>]
@@ -207,7 +215,7 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
 
-            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.NotFound getUser.StatusCode
             Expect.equalJson expected actual
         }
 
@@ -224,10 +232,10 @@ module UserTests =
             do! TestData.insertUser user app.ConnectionString
 
             let! unregister = app.UnregisterUser(user.Id)
-            Expect.equal "Expected equal status codes." HttpStatusCode.NoContent unregister.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.NoContent unregister.StatusCode
 
             let! getUser = app.GetUser(user.Id)
-            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound getUser.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.NotFound getUser.StatusCode
         }
 
     [<Fact>]
@@ -255,6 +263,6 @@ module UserTests =
                     "type", JStr "https://tools.ietf.org/html/rfc9110#section-15.5.5"
                 ]
 
-            Expect.equal "Expected equal status codes." HttpStatusCode.NotFound unregister.StatusCode
+            Expect.equal "Expected equal status codes" HttpStatusCode.NotFound unregister.StatusCode
             Expect.equalJson expected actual
         }

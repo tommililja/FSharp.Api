@@ -43,6 +43,11 @@ module RegisterUserHandler =
                 |> Database.Users.tryGetByEmail
                 |> Effect.noneOr (Conflict "User is already registered.")
 
+            let! _data =
+                request.Email
+                |> ExampleService.getData
+                |> Effect.changeError (ignore >> InternalServerError)
+
             let! userId = Guid.create ()
 
             let user = {

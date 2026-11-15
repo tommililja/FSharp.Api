@@ -18,33 +18,31 @@ module EndpointHandlers =
         fun ctx ->
             let errors =
                 errors
-                |> List.map (fun e ->
-                    e.Path
-                    |> JsonPath.asString, [| e.Details |]
-                )
+                |> List.map (fun e -> JsonPath.asString e.Path, [| e.Details |])
+                |> List.distinctBy fst
 
-            Results.ValidationProblem(dict errors,
-                detail = detail,
-                instance = ctx.Request.Path.Value
-            ).ExecuteAsync(ctx)
+            Results
+                .ValidationProblem(dict errors, detail, ctx.Request.Path.Value)
+                .ExecuteAsync(ctx)
 
     let problem (statusCode:int) detail : EndpointHandler =
         fun ctx ->
-            Results.Problem(
-                statusCode = statusCode,
-                detail = detail,
-                instance = ctx.Request.Path.Value
-            ).ExecuteAsync(ctx)
+            Results
+                .Problem(detail, ctx.Request.Path.Value, statusCode)
+                .ExecuteAsync(ctx)
 
     let json statusCode json : EndpointHandler =
         fun ctx ->
             task {
                 ctx.Response.StatusCode <- statusCode
                 ctx.Response.ContentType <- JsonContentType
+
                 use writer = new Utf8JsonWriter(ctx.Response.BodyWriter)
                 Json.writeTo writer json
                 writer.Flush()
+
                 let! _ = ctx.Response.BodyWriter.FlushAsync(ctx.RequestAborted)
+
                 ()
             }
 
@@ -54,7 +52,9 @@ module EndpointHandlers =
                 ctx.Response.ContentType <- JsonContentType
                 ctx.Response.StatusCode <- 200
                 ctx.Response.ContentLength <- bytes.Length
+
                 let! _ = ctx.Response.BodyWriter.WriteAsync(bytes, ctx.RequestAborted)
+
                 ()
             }
 
@@ -120,7 +120,7 @@ type ApiError =
     | NotFound
     | BadRequest of detail:string * ParseError list
     | Conflict of detail:string
-    | InternalServerError
+    | InternalServerError of unit
 
 module ApiResponse =
     open EndpointHandlers
@@ -146,7 +146,7 @@ module ApiError =
             | [] -> problem 400 detail
             | items -> validationProblem detail items
         | Conflict detail -> problem 409 detail
-        | InternalServerError -> problem 500 "An unexpected error occurred."
+        | InternalServerError () -> problem 500 "An unexpected error occurred."
 
 module Routing =
 

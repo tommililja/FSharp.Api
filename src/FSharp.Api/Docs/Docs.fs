@@ -17,10 +17,9 @@ module Docs =
 
     let json =
         let json =
-            document
-                .SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_2)
-                .GetAwaiter()
-                .GetResult()
+            document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_2)
+            |> Async.Await
+            |> Async.RunSynchronously
 
         Encoding.UTF8.GetBytes(json)
 

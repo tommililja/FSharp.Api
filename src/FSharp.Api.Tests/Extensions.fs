@@ -1,9 +1,14 @@
 namespace FSharp.Api.Tests
 
+open System
 open System.Net.Http
 open System.Text
 open System.Threading
 open Farse
+
+module Msg =
+
+    let none = String.Empty
 
 module Expect =
 

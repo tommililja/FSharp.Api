@@ -1,6 +1,8 @@
 namespace FSharp.Api
 
 open System
+open System.Net.Http
+open Farse
 open NodaTime.Text
 open Orsak
 
@@ -55,6 +57,22 @@ module Logger =
         Effect.Create (fun (env:#ILogging) ->
             env.GetLogger(name)
         )
+
+module HttpClient =
+
+    let get () =
+        Effect.Create (fun (env:#IHttpClient) ->
+            env.GetHttpClient()
+        )
+
+module HttpResponseMessage =
+
+    let parse parser token (message:HttpResponseMessage) =
+        task {
+            let! stream = message.Content.ReadAsStreamAsync()
+            let! result = parser |> Parser.parseAsync stream token
+            return result
+        }
 
 module Effect =
 
