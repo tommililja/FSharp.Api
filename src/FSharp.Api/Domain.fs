@@ -43,4 +43,5 @@ type User = {
     Id: UserId
     Email: Email
     BirthDate: LocalDate
+    RegisteredAt: Instant
 }

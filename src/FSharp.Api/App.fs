@@ -7,6 +7,7 @@ open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open NodaTime
 open Oxpecker
 
 module App =
@@ -21,13 +22,15 @@ module App =
         .AddProblemDetails()
         .AddScoped<IAppEnv>(fun x ->
             let newGuid = Guid.NewGuid
+            let getTime = SystemClock.Instance.GetCurrentInstant
             let loggerFactory = x.GetRequiredService<ILoggerFactory>()
             let httpClientFactory = x.GetRequiredService<IHttpClientFactory>()
+
             let cancellationToken =
                 x.GetRequiredService<IHttpContextAccessor>()
                     .HttpContext.RequestAborted
 
-            AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings.Value
+            AppEnv.create newGuid getTime loggerFactory httpClientFactory cancellationToken appSettings.Value
         )
 
     let app = builder.Build()

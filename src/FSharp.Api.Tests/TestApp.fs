@@ -13,6 +13,7 @@ open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
+open NodaTime
 open RichardSzalay.MockHttp
 open Testcontainers.MsSql
 open Xunit
@@ -106,6 +107,7 @@ module TestApp =
 
                 let configureEnv (x:IServiceProvider) =
                     let newGuid = GuidGen.asFn guidGen
+                    let getTime () = Instant.FromUtc(2026, 1, 1, 12, 0)
                     let loggerFactory = x.GetRequiredService<ILoggerFactory>()
                     let httpClientFactory = x.GetRequiredService<IHttpClientFactory>()
 
@@ -117,7 +119,7 @@ module TestApp =
                         x.GetRequiredService<IConfiguration>()
                         |> AppSettings.load
 
-                    AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings
+                    AppEnv.create newGuid getTime loggerFactory httpClientFactory cancellationToken appSettings
 
                 !httpHandlers.Fallback
                     .Throw(InvalidOperationException("No matching mock handler found."))

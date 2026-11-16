@@ -46,6 +46,7 @@ module UserTests =
                     "id", JStr (Guid.asString user.Id)
                     "email", JStr user.Email
                     "birthDate", JStr user.BirthDate
+                    "registeredAt", JStr user.RegisteredAt
                 ]
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -189,9 +190,10 @@ module UserTests =
                 [ 1 .. users ]
                 |> JObj.array (fun n ->
                     [
-                        "id", JStr (Guid.asString (TestData.userId n))
+                        "id", JStr (TestData.userId n)
                         "email", JStr $"user%i{n}@domain.com"
                         "birthDate", JStr "2000-01-01"
+                        "registeredAt", JStr "2026-01-01T00:00:00Z"
                     ]
                 )
 

@@ -23,6 +23,7 @@ module OpenApi =
         OpenApiSchema(
             Type = JsonSchemaType.Object,
             Required = HashSet [ "type"; "title"; "status" ],
+            AdditionalPropertiesAllowed = false,
             Properties = dict problemProperties
         )
 

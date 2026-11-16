@@ -1,5 +1,6 @@
 namespace FSharp.Api
 
+open System
 open System.Data
 open System.Data.Common
 open FSharp.Control
@@ -63,25 +64,30 @@ module Database =
                 Id = x.ReadGuid "Id" |> UserId.fromGuid
                 Email = x.ReadString "Email" |> Email
                 BirthDate = x.ReadDateTime "BirthDate" |> LocalDate.FromDateTime
+                RegisteredAt =
+                    DateTime.SpecifyKind(x.ReadDateTime "RegisteredAt", DateTimeKind.Utc)
+                    |> Instant.FromDateTimeUtc
             }
 
         let add user =
             exec
                 "
-                    INSERT INTO [User] (Id, Email, BirthDate)
-                    VALUES (@id, @email, @birthDate)
+                    INSERT INTO [User] (Id, Email, BirthDate, RegisteredAt)
+                    VALUES (@id, @email, @birthDate, @registeredAt)
                 "
                 [
                     "id", sqlGuid (UserId.asGuid user.Id)
                     "email", sqlString (Email.asString user.Email)
                     "birthDate", sqlDateTime (user.BirthDate.ToDateTimeUnspecified())
+                    "registeredAt", sqlDateTime (user.RegisteredAt.ToDateTimeUtc())
                 ]
 
         let getList () =
             list
                 "
-                    SELECT Id, Email, BirthDate
+                    SELECT Id, Email, BirthDate, RegisteredAt
                     FROM [User]
+                    ORDER BY RegisteredAt DESC, Id DESC
                 "
                 []
                 reader
@@ -89,7 +95,7 @@ module Database =
         let getStream () =
             stream
                 "
-                    SELECT Id, Email, BirthDate
+                    SELECT Id, Email, BirthDate, RegisteredAt
                     FROM [User]
                 "
                 []
@@ -98,7 +104,7 @@ module Database =
         let tryGet userId =
             trySingle
                 "
-                    SELECT Id, Email, BirthDate
+                    SELECT Id, Email, BirthDate, RegisteredAt
                     FROM [User]
                     WHERE [Id] = @id
                 "
@@ -110,7 +116,7 @@ module Database =
         let tryGetByEmail email =
             trySingle
                 "
-                    SELECT Id, Email, BirthDate
+                    SELECT Id, Email, BirthDate, RegisteredAt
                     FROM [User]
                     WHERE [Email] = @email
                 "

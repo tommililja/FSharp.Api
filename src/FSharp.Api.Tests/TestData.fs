@@ -7,6 +7,7 @@ type TestUser = {
     Id: Guid
     Email: string
     BirthDate: string
+    RegisteredAt: string
 }
 
 module TestData =
@@ -15,6 +16,7 @@ module TestData =
         Id = Guid.NewGuid ()
         Email = "alice@domain.com"
         BirthDate = "2000-01-01"
+        RegisteredAt = "2026-01-01T12:00:00Z"
     }
 
     let private execute (connectionString:string) (sql:string) =
@@ -28,24 +30,24 @@ module TestData =
             ()
         }
 
+    let userId (n:int) = $"00000000000000000000%012i{n}"
+
     let insertUser user conn =
         execute conn
             $"
-                INSERT INTO [User] (Id, Email, BirthDate)
-                VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}')
+                INSERT INTO [User] (Id, Email, BirthDate, RegisteredAt)
+                VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}', '%s{user.RegisteredAt}')
             "
-
-    let userId (i:int) =
-        Guid($"00000000-0000-0000-0000-%012i{i}")
 
     let insertUsers n conn =
         execute conn
             $"
-                INSERT INTO [User] (Id, Email, BirthDate)
+                INSERT INTO [User] (Id, Email, BirthDate, RegisteredAt)
                 SELECT
                     CAST(CONCAT('00000000-0000-0000-0000-', RIGHT(CONCAT('000000000000', value), 12)) AS UNIQUEIDENTIFIER),
                     CONCAT('user', value, '@domain.com'),
-                    '2000-01-01'
+                    '2000-01-01',
+                    '2026-01-01T00:00:00'
                 FROM GENERATE_SERIES(1, %i{n})
             "
 
@@ -59,8 +61,10 @@ module TestData =
                     Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
                     Email NVARCHAR(255) NOT NULL,
                     BirthDate DATE NOT NULL,
+                    RegisteredAt DATETIME2 NOT NULL,
 
-                    INDEX UX_User_Email UNIQUE (Email)
+                    INDEX UX_User_Email UNIQUE (Email),
+                    INDEX IX_User_RegisteredAt (RegisteredAt, Id)
                 )
             "
 

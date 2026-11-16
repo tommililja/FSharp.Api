@@ -30,6 +30,14 @@ module UserPaths =
             Examples = OpenApi.examples [ "2026-01-01" ]
         )
 
+    let private dateTimeSchema description =
+        OpenApiSchema(
+            Type = JsonSchemaType.String,
+            Format = "date-time",
+            Description = description,
+            Examples = OpenApi.examples [ "2026-01-01T12:00:00Z" ]
+        )
+
     let private userIdParam =
         OpenApiParameter(
             Name = "id",
@@ -42,10 +50,12 @@ module UserPaths =
         OpenApiSchema(
             Type = JsonSchemaType.Object,
             Required = HashSet [ "id"; "email"; "birthDate" ],
+            AdditionalPropertiesAllowed = false,
             Properties = dict [
                 "id", guidSchema
                 "email", emailSchema
                 "birthDate", dateSchema "Birth date (ISO 8601, yyyy-MM-dd)"
+                "registeredAt", dateTimeSchema "Registration time (ISO 8601, UTC)"
             ]
         )
 

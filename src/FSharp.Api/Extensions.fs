@@ -27,6 +27,16 @@ module Guid =
     let asString (x:Guid) =
         x.ToString("N")
 
+module Instant =
+
+    let now () =
+        Effect.Create(fun (env:#IInstant) ->
+            env.GetCurrentTime()
+        )
+
+    let as8601String =
+        InstantPattern.ExtendedIso.Format
+
 module LocalDate =
 
     let parse str =

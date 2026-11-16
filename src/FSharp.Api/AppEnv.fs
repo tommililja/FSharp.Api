@@ -7,7 +7,7 @@ open Microsoft.Extensions.Logging
 
 module AppEnv =
 
-    let create newGuid
+    let create newGuid getTime
         (loggerFactory:ILoggerFactory)
         (httpClientFactory:IHttpClientFactory)
         cancellationToken appSettings =
@@ -25,6 +25,7 @@ module AppEnv =
             new IAppEnv with
                 member _.GetSqlConnection() = opened.Force()
                 member _.CreateGuid() = newGuid ()
+                member _.GetCurrentTime() = getTime ()
                 member _.GetLogger(name) = loggerFactory.CreateLogger(name)
                 member _.GetCancellationToken() = cancellationToken
                 member _.GetHttpClient() = httpClientFactory.CreateClient()

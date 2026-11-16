@@ -14,6 +14,7 @@ module UserResponse =
             "id", JStr (UserId.asString user.Id)
             "email", JStr (Email.asString user.Email)
             "birthDate", JStr (LocalDate.as8601String user.BirthDate)
+            "registeredAt", JStr (Instant.as8601String user.RegisteredAt)
         ]
 
 module RegisterUserHandler =
@@ -48,12 +49,14 @@ module RegisterUserHandler =
                 |> ExampleService.getData
                 |> Effect.changeError (ignore >> InternalServerError)
 
+            let! now = Instant.now ()
             let! userId = Guid.create ()
 
             let user = {
                 Id = UserId.fromGuid userId
                 Email = request.Email
                 BirthDate = request.BirthDate
+                RegisteredAt = now
             }
 
             do! Database.Users.add user

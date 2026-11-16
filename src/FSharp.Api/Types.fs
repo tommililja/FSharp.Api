@@ -7,6 +7,7 @@ open System.Threading.Tasks
 open Microsoft.Data.SqlClient
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Logging
+open NodaTime
 open Orsak
 
 [<NoComparison>]
@@ -41,6 +42,9 @@ module AppSettings =
 type IGuid =
     abstract CreateGuid: unit -> Guid
 
+type IInstant =
+    abstract GetCurrentTime: unit -> Instant
+
 type ISqlConnection =
     abstract GetSqlConnection: unit -> Task<SqlConnection>
 
@@ -55,6 +59,7 @@ type IHttpClient =
 
 type IAppEnv =
     inherit IGuid
+    inherit IInstant
     inherit ILogging
     inherit ISqlConnection
     inherit ICancellationToken
