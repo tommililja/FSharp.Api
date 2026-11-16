@@ -13,7 +13,6 @@ open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
-open NodaTime
 open RichardSzalay.MockHttp
 open Testcontainers.MsSql
 open Xunit
@@ -73,7 +72,7 @@ module TestApp =
             }
         )
 
-    let create (guidGen:GuidGen) =
+    let create (guidGen:GuidGen) (timeGen:TimeGen) =
         task {
             let! connectionString = start.Value
 
@@ -107,7 +106,7 @@ module TestApp =
 
                 let configureEnv (x:IServiceProvider) =
                     let newGuid = GuidGen.asFn guidGen
-                    let getTime () = Instant.FromUtc(2026, 1, 1, 12, 0)
+                    let getTime = TimeGen.asFn timeGen
                     let loggerFactory = x.GetRequiredService<ILoggerFactory>()
                     let httpClientFactory = x.GetRequiredService<IHttpClientFactory>()
 

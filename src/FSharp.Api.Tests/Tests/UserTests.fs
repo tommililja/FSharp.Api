@@ -18,9 +18,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             !app.HttpHandlers
                 .Expect(HttpMethod.Get, "/test")
@@ -46,7 +46,7 @@ module UserTests =
                     "id", JStr (Guid.asString user.Id)
                     "email", JStr user.Email
                     "birthDate", JStr user.BirthDate
-                    "registeredAt", JStr user.RegisteredAt
+                    "registeredAt", JStr (Instant.as8601String user.RegisteredAt)
                 ]
 
             let actual = json |> Expect.wantOk "Expected valid JSON."
@@ -66,9 +66,9 @@ module UserTests =
                 }
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             let request =
                 JObj [
@@ -106,9 +106,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             let! register = app.RegisterUser("""{ "email: """)
             let! json = HttpResponseMessage.asJson register
@@ -135,9 +135,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUser user
 
@@ -173,9 +173,9 @@ module UserTests =
             let users = 100
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUsers users
 
@@ -206,9 +206,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             let! getUser = app.GetUser(user.Id)
             let! json = HttpResponseMessage.asJson getUser
@@ -235,9 +235,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUser user
 
@@ -254,9 +254,9 @@ module UserTests =
             let user = TestData.user
 
             use! app =
-                user.Id
-                |> GuidGen.single
-                |> TestApp.create
+                TestApp.create
+                   (GuidGen.single user.Id)
+                   (TimeGen.single user.RegisteredAt)
 
             let! unregister = app.UnregisterUser(user.Id)
             let! json = HttpResponseMessage.asJson unregister

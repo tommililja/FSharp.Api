@@ -2,12 +2,14 @@ namespace FSharp.Api.Tests
 
 open System
 open Microsoft.Data.SqlClient
+open FSharp.Api
+open NodaTime
 
 type TestUser = {
     Id: Guid
     Email: string
     BirthDate: string
-    RegisteredAt: string
+    RegisteredAt: Instant
 }
 
 module TestData =
@@ -16,7 +18,7 @@ module TestData =
         Id = Guid.NewGuid ()
         Email = "alice@domain.com"
         BirthDate = "2000-01-01"
-        RegisteredAt = "2026-01-01T12:00:00Z"
+        RegisteredAt = Instant.FromUtc(2026, 1, 1, 12, 0)
     }
 
     let private execute (connectionString:string) (sql:string) =
@@ -36,7 +38,7 @@ module TestData =
         execute conn
             $"
                 INSERT INTO [User] (Id, Email, BirthDate, RegisteredAt)
-                VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}', '%s{user.RegisteredAt}')
+                VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}', '%s{Instant.as8601String user.RegisteredAt}')
             "
 
     let insertUsers n conn =
