@@ -169,25 +169,33 @@ module UserTests =
     let ``GET /users should return all Users`` () =
         task {
             let user = TestData.user
+            let users = 100
 
             use! app =
                 user.Id
                 |> GuidGen.single
                 |> TestApp.create
 
-            do! app.InsertUsers 100
+            do! app.InsertUsers users
 
             let! getUsers = app.GetUsers()
             Expect.equal "Expected equal status codes." HttpStatusCode.OK getUsers.StatusCode
 
             let! json = HttpResponseMessage.asJson getUsers
 
-            let actual =
-                match json with
-                | Ok (JArr list) -> list.Length
-                | _ -> failwith "Expected an array."
+            let actual = json |> Expect.wantOk "Expected valid JSON."
 
-            return Expect.equal "Expected equal values" 100 actual
+            let expected =
+                [ 1 .. users ]
+                |> JObj.array (fun n ->
+                    [
+                        "id", JStr (Guid.asString (TestData.userId n))
+                        "email", JStr $"user%i{n}@domain.com"
+                        "birthDate", JStr "2000-01-01"
+                    ]
+                )
+
+            return Expect.equalJson expected actual
         }
 
     [<Fact>]

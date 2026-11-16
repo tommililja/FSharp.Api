@@ -35,11 +35,17 @@ module TestData =
                 VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}')
             "
 
+    let userId (i:int) =
+        Guid($"00000000-0000-0000-0000-%012i{i}")
+
     let insertUsers n conn =
         execute conn
             $"
                 INSERT INTO [User] (Id, Email, BirthDate)
-                SELECT NEWID(), CONCAT('user', value, '@domain.com'), '2000-01-01'
+                SELECT
+                    CAST(CONCAT('00000000-0000-0000-0000-', RIGHT(CONCAT('000000000000', value), 12)) AS UNIQUEIDENTIFIER),
+                    CONCAT('user', value, '@domain.com'),
+                    '2000-01-01'
                 FROM GENERATE_SERIES(1, %i{n})
             "
 
