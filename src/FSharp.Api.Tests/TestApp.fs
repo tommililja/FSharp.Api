@@ -1,7 +1,6 @@
 namespace FSharp.Api.Tests
 
 open System
-open System.IO
 open System.Net.Http
 open System.Text
 open System.Threading
@@ -29,8 +28,9 @@ type private HttpLoggingFilter() =
             )
 
 type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient, httpHandlers:MockHttpMessageHandler) =
-    member _.ConnectionString = connectionString
     member _.HttpHandlers = httpHandlers
+
+    // Api
 
     member _.GetUser(userId) =
         client.GetAsync($"/users/%s{Guid.asString userId}")
@@ -46,6 +46,16 @@ type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, cl
 
     member _.UnregisterUser(userId) =
         client.DeleteAsync($"/users/%s{Guid.asString userId}")
+
+    // Test data
+
+    member _.InsertUser(user) =
+        connectionString
+        |> TestData.insertUser user
+
+    member _.InsertUsers(n) =
+        connectionString
+        |> TestData.insertUsers n
 
     interface IDisposable with
         member _.Dispose() =

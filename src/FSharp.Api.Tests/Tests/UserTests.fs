@@ -138,7 +138,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            do! TestData.insertUser user app.ConnectionString
+            do! app.InsertUser user
 
             let request =
                 JObj [
@@ -175,7 +175,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            do! TestData.insertUsers 100 app.ConnectionString
+            do! app.InsertUsers 100
 
             let! getUsers = app.GetUsers()
             Expect.equal "Expected equal status codes." HttpStatusCode.OK getUsers.StatusCode
@@ -229,7 +229,7 @@ module UserTests =
                 |> GuidGen.single
                 |> TestApp.create
 
-            do! TestData.insertUser user app.ConnectionString
+            do! app.InsertUser user
 
             let! unregister = app.UnregisterUser(user.Id)
             Expect.equal "Expected equal status codes" HttpStatusCode.NoContent unregister.StatusCode
