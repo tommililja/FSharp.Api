@@ -13,6 +13,7 @@ open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.HttpLogging
 open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open RichardSzalay.MockHttp
@@ -122,12 +123,9 @@ module TestApp =
                         x.GetRequiredService<IHttpContextAccessor>()
                             .HttpContext.RequestAborted
 
-                    let appSettings = {
-                        ConnectionString = connectionString
-                        Integrations = {
-                            ExampleService = Uri("http://localhost")
-                        }
-                    }
+                    let appSettings =
+                        x.GetRequiredService<IConfiguration>()
+                        |> AppSettings.load
 
                     AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings
 
@@ -148,11 +146,20 @@ module TestApp =
                     .PostConfigure<ProblemDetailsOptions>(configureProblemDetails)
                     .AddScoped<IAppEnv>(configureEnv)
 
+            let configureAppConfiguration (config:IConfigurationBuilder) =
+                !config.AddInMemoryCollection(
+                    dict [
+                        "ConnectionStrings:DefaultConnection", connectionString
+                        "Integrations:ExampleService", "http://localhost"
+                    ]
+                )
+
             let factory =
                 {
                     new WebApplicationFactory<IAppEnv>() with
                         member _.ConfigureWebHost(builder) =
                             !builder
+                                .ConfigureAppConfiguration(configureAppConfiguration)
                                 .ConfigureLogging(configureLogging)
                                 .ConfigureTestServices(configureTestServices)
                 }

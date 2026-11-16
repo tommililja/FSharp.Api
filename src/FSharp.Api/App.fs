@@ -13,7 +13,7 @@ module App =
 
     let builder = WebApplication.CreateBuilder()
 
-    let appSettings = AppSettings.load builder.Configuration
+    let appSettings = lazy AppSettings.load builder.Configuration
 
     !builder.Services
         .AddHttpClient()
@@ -27,10 +27,12 @@ module App =
                 x.GetRequiredService<IHttpContextAccessor>()
                     .HttpContext.RequestAborted
 
-            AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings
+            AppEnv.create newGuid loggerFactory httpClientFactory cancellationToken appSettings.Value
         )
 
     let app = builder.Build()
+
+    !appSettings.Force()
 
     !app
         .UseExceptionHandler()

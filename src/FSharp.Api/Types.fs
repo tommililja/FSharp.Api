@@ -25,7 +25,7 @@ type IAppSettings =
 
 module AppSettings =
 
-    let load (config:ConfigurationManager) =
+    let load (config:IConfiguration) =
         {
             ConnectionString = config.GetConnectionString("DefaultConnection")
             Integrations = {
