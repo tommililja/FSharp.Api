@@ -7,6 +7,7 @@
         <Compile Include="Extensions.fs" />
         <Compile Include="OpenApiValidationHandler.fs" />
         <Compile Include="GuidGen.fs" />
+        <Compile Include="TimeGen.fs" />
         <Compile Include="TestData.fs" />
         <Compile Include="TestApp.fs" />
         <Compile Include="Tests\UserTests.fs" />
