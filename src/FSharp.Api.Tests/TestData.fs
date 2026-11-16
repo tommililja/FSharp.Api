@@ -2,7 +2,6 @@ namespace FSharp.Api.Tests
 
 open System
 open Microsoft.Data.SqlClient
-open FSharp.Api
 open NodaTime
 
 type TestUser = {
@@ -36,10 +35,15 @@ module TestData =
 
     let insertUser user conn =
         execute conn
-            $"
+            $"""
                 INSERT INTO [User] (Id, Email, BirthDate, RegisteredAt)
-                VALUES ('%s{string user.Id}', '%s{user.Email}', '%s{user.BirthDate}', '%s{Instant.as8601String user.RegisteredAt}')
-            "
+                VALUES (
+                    '%s{string user.Id}',
+                    '%s{user.Email}',
+                    '%s{user.BirthDate}',
+                    '%s{user.RegisteredAt.ToDateTimeUtc().ToString("s")}'
+                )
+            """
 
     let insertUsers n conn =
         execute conn

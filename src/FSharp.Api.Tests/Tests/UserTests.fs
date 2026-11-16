@@ -67,8 +67,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             let request =
                 JObj [
@@ -107,8 +107,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             let! register = app.RegisterUser("""{ "email: """)
             let! json = HttpResponseMessage.asJson register
@@ -136,8 +136,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUser user
 
@@ -174,8 +174,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUsers users
 
@@ -207,8 +207,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             let! getUser = app.GetUser(user.Id)
             let! json = HttpResponseMessage.asJson getUser
@@ -236,8 +236,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             do! app.InsertUser user
 
@@ -255,8 +255,8 @@ module UserTests =
 
             use! app =
                 TestApp.create
-                   (GuidGen.single user.Id)
-                   (TimeGen.single user.RegisteredAt)
+                    (GuidGen.single user.Id)
+                    (TimeGen.single user.RegisteredAt)
 
             let! unregister = app.UnregisterUser(user.Id)
             let! json = HttpResponseMessage.asJson unregister

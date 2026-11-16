@@ -113,7 +113,11 @@ type OpenApiValidationHandler(document:OpenApiDocument) =
 
     let schemas = ConcurrentDictionary<IOpenApiSchema, JsonSchema>(HashIdentity.Reference)
 
-    let evaluationOptions = EvaluationOptions(OutputFormat = OutputFormat.List)
+    let evaluationOptions =
+        EvaluationOptions (
+            OutputFormat = OutputFormat.List,
+            RequireFormatValidation = true
+        )
 
     let paths =
         match document.Paths with

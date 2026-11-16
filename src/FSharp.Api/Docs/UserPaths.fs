@@ -26,6 +26,7 @@ module UserPaths =
         OpenApiSchema(
             Type = JsonSchemaType.String,
             Format = "date",
+            Pattern = @"^\d{4}-\d{2}-\d{2}$",
             Description = description,
             Examples = OpenApi.examples [ "2026-01-01" ]
         )
@@ -34,6 +35,7 @@ module UserPaths =
         OpenApiSchema(
             Type = JsonSchemaType.String,
             Format = "date-time",
+            Pattern = @"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$",
             Description = description,
             Examples = OpenApi.examples [ "2026-01-01T12:00:00Z" ]
         )
