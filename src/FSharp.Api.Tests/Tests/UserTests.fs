@@ -188,6 +188,7 @@ module UserTests =
 
             let expected =
                 [ 1 .. users ]
+                |> List.rev
                 |> JObj.array (fun n ->
                     [
                         "id", JStr (TestData.userId n)

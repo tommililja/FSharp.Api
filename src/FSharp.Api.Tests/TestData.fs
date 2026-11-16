@@ -17,7 +17,7 @@ module TestData =
         Id = Guid.NewGuid ()
         Email = "alice@domain.com"
         BirthDate = "2000-01-01"
-        RegisteredAt = Instant.FromUtc(2026, 1, 1, 12, 0)
+        RegisteredAt = Instant.FromUtc(2026, 1, 1, 12, 0).PlusTicks(1234567L)
     }
 
     let private execute (connectionString:string) (sql:string) =

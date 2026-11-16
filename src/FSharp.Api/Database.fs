@@ -18,6 +18,7 @@ module Database =
                 conn
                 |> Db.newCommand sql
                 |> Db.setParams param
+                |> Db.useDateTime2
                 |> Db.setCancellationToken token
         }
 
@@ -97,6 +98,7 @@ module Database =
                 "
                     SELECT Id, Email, BirthDate, RegisteredAt
                     FROM [User]
+                    ORDER BY RegisteredAt DESC, Id DESC
                 "
                 []
                 reader

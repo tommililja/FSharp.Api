@@ -1,7 +1,9 @@
 namespace FSharp.Api
 
 open System
+open System.Data
 open System.Net.Http
+open Donald
 open Farse
 open NodaTime.Text
 open Orsak
@@ -53,6 +55,15 @@ module SqlConnection =
         Effect.Create(fun (env:#ISqlConnection) ->
             env.GetSqlConnection()
         )
+
+module Db =
+
+    let useDateTime2 (dbUnit:DbUnit) =
+        for param in dbUnit.Command.Parameters do
+            let dataParam = param :?> IDbDataParameter
+            if dataParam.DbType = DbType.DateTime then
+                dataParam.DbType <- DbType.DateTime2
+        dbUnit
 
 module CancellationToken =
 
