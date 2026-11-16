@@ -4,12 +4,6 @@
         <TargetFramework>net11.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <Content Include="Scripts\CreateTables.sql">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="Scripts\ResetTables.sql">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
         <Compile Include="Extensions.fs" />
         <Compile Include="OpenApiValidationHandler.fs" />
         <Compile Include="GuidGen.fs" />

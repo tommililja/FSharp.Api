@@ -17,7 +17,7 @@ module TestData =
         BirthDate = "2000-01-01"
     }
 
-    let execute (connectionString:string) (sql:string) =
+    let private execute (connectionString:string) (sql:string) =
         task {
             use connection = new SqlConnection(connectionString)
             do! connection.OpenAsync()
@@ -42,3 +42,22 @@ module TestData =
                 SELECT NEWID(), CONCAT('user', value, '@domain.com'), '2000-01-01'
                 FROM GENERATE_SERIES(1, %i{n})
             "
+
+    let createTables conn =
+        execute conn
+            "
+                DROP TABLE IF EXISTS [User]
+
+                CREATE TABLE [User]
+                (
+                    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+                    Email NVARCHAR(255) NOT NULL,
+                    BirthDate DATE NOT NULL,
+
+                    INDEX UX_User_Email UNIQUE (Email)
+                )
+            "
+
+    let resetTables conn =
+        execute conn
+            "TRUNCATE TABLE [User]"

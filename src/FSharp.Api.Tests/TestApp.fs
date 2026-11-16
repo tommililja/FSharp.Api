@@ -29,7 +29,6 @@ type private HttpLoggingFilter() =
             )
 
 type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient, httpHandlers:MockHttpMessageHandler) =
-    member _.Client = client
     member _.ConnectionString = connectionString
     member _.HttpHandlers = httpHandlers
 
@@ -68,18 +67,16 @@ module TestApp =
             task {
                 do! container.StartAsync()
                 let connectionString = container.GetConnectionString()
-                do! TestData.execute connectionString (File.ReadAllText "Scripts/CreateTables.sql")
+                do! TestData.createTables connectionString
                 return connectionString
             }
         )
-
-    let private resetSql = File.ReadAllText "Scripts/ResetTables.sql"
 
     let create (guidGen:GuidGen) =
         task {
             let! connectionString = start.Value
 
-            do! TestData.execute connectionString resetSql
+            do! TestData.resetTables connectionString
 
             let output = TestContext.Current.TestOutputHelper
 
