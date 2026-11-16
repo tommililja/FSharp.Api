@@ -51,7 +51,7 @@ module UserPaths =
     let private userSchema =
         OpenApiSchema(
             Type = JsonSchemaType.Object,
-            Required = HashSet [ "id"; "email"; "birthDate" ],
+            Required = HashSet [ "id"; "email"; "birthDate"; "registeredAt" ],
             AdditionalPropertiesAllowed = false,
             Properties = dict [
                 "id", guidSchema
