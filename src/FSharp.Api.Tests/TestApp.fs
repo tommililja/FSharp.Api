@@ -6,10 +6,8 @@ open System.Text
 open System.Threading
 open FSharp.Api
 open Meziantou.Extensions.Logging.Xunit.v3
-open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
-open Microsoft.AspNetCore.HttpLogging
 open Microsoft.AspNetCore.Mvc.Testing
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.Configuration
@@ -18,14 +16,6 @@ open Microsoft.Extensions.Logging
 open RichardSzalay.MockHttp
 open Testcontainers.MsSql
 open Xunit
-
-type private HttpLoggingFilter() =
-    interface IStartupFilter with
-        member _.Configure(next) =
-            Action<IApplicationBuilder>(fun app ->
-                !app.UseHttpLogging()
-                next.Invoke(app)
-            )
 
 type TestApp(factory:WebApplicationFactory<IAppEnv>, connectionString:string, client:HttpClient, httpHandlers:MockHttpMessageHandler) =
     member _.HttpHandlers = httpHandlers
@@ -107,14 +97,6 @@ module TestApp =
             let httpHandlers = new MockHttpMessageHandler()
 
             let configureTestServices (services:IServiceCollection) =
-                let addHttpLogging (options:HttpLoggingOptions) =
-                    options.LoggingFields <-
-                        HttpLoggingFields.RequestPropertiesAndHeaders
-                        ||| HttpLoggingFields.RequestBody
-                        ||| HttpLoggingFields.ResponseBody
-                        ||| HttpLoggingFields.ResponsePropertiesAndHeaders
-                    options.CombineLogs <- true
-
                 let configureProblemDetails (options:ProblemDetailsOptions) =
                     let existing = options.CustomizeProblemDetails
                     options.CustomizeProblemDetails <- (fun context ->
@@ -126,6 +108,7 @@ module TestApp =
                     let newGuid = GuidGen.asFn guidGen
                     let loggerFactory = x.GetRequiredService<ILoggerFactory>()
                     let httpClientFactory = x.GetRequiredService<IHttpClientFactory>()
+
                     let cancellationToken =
                         x.GetRequiredService<IHttpContextAccessor>()
                             .HttpContext.RequestAborted
@@ -148,8 +131,6 @@ module TestApp =
                     )
 
                 !services
-                    .AddHttpLogging(addHttpLogging)
-                    .AddTransient<IStartupFilter, HttpLoggingFilter>()
                     .PostConfigure<ProblemDetailsOptions>(configureProblemDetails)
                     .AddScoped<IAppEnv>(configureEnv)
 
