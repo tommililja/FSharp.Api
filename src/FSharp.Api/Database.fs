@@ -31,8 +31,7 @@ module Database =
     let private trySingle sql param map =
         eff {
             let! cmd = command sql param
-            let! x = Db.Async.querySingle map cmd
-            return x
+            return! Db.Async.querySingle map cmd
         }
 
     let private list sql param map =

@@ -23,9 +23,9 @@
       <PackageReference Include="Farse" Version="1.0.0" />
       <PackageReference Include="FSharp.Control.TaskSeq" Version="1.1.1" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.2" />
-      <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
+      <PackageReference Include="Microsoft.OpenApi" Version="3.11.1" />
       <PackageReference Include="NodaTime" Version="3.3.7" />
-      <PackageReference Include="Orsak" Version="0.8.0" />
+      <PackageReference Include="Orsak" Version="0.9.0" />
       <PackageReference Include="Oxpecker" Version="2.1.1" />
       <PackageReference Update="FSharp.Core" Version="11.0.101" />
     </ItemGroup>
