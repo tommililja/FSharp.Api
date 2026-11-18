@@ -13,7 +13,7 @@ module Endpoints =
                     router "" GetUsersHandler.handle
                     routefr "/{%O:guid}" (UserId.fromGuid >> GetUserHandler.handle)
                 ]
-                POST [ routeb "" RegisterUserHandler.parse RegisterUserHandler.handle ]
+                POST [ routeb "" RegisterUserRequest.parse RegisterUserHandler.handle ]
                 DELETE [ routefr "/{%O:guid}" (UserId.fromGuid >> UnregisterUserHandler.handle) ]
             ]
 
