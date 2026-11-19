@@ -13,7 +13,6 @@
         <Compile Include="Database.fs" />
         <Compile Include="Integrations\Http.fs" />
         <Compile Include="Integrations\ExampleService.fs" />
-        <Compile Include="Handlers\UserResponse.fs" />
         <Compile Include="Handlers\GetUserHandler.fs" />
         <Compile Include="Handlers\GetUsersHandler.fs" />
         <Compile Include="Handlers\RegisterUserHandler.fs" />
